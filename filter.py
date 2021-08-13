@@ -1,7 +1,6 @@
-from generator import load_users_from_file
+from generator import *
 from filter_tools import *
 import datetime
-
 
 # Prepare data
 users = load_users_from_file("users")
@@ -9,11 +8,11 @@ target = users[1]
 users.remove(target)
 users = filter_users(target, users)
 add_priority(target, users)
-remove_helpers(target['stole_from'], users)
+remove_users_by_id(target['stole_from'], users)
 
 
-# Sort by date and select most recent students
-most_recent_users = select_most_recent_users(users)
+# Sort by date and select last submitters since date
+last_submitters = get_last_submitters_since(target['sending_task_time'], users)
 
 # Sort by reputation and select with least amount
 

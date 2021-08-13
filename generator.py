@@ -11,7 +11,7 @@ def generate_users():
 			'id': i,
 			'task_id': random.randrange(3),
 			'language_id': random.randrange(0, 3),
-			'last_login_time': date(year=2021-random.randrange(2), month=8-random.randrange(2), day=1+random.randrange(25)),
+			'sending_task_time': date(year=2021-random.randrange(2), month=8-random.randrange(2), day=1+random.randrange(25)),
 			'test_passed': bool(random.randrange(2)),
 			'stole_from': [random.randrange(1000) for i in range(random.randrange(4))],
 			'reputation': int(random.random()*100),
