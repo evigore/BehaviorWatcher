@@ -42,9 +42,13 @@ def remove_user_by_id(id, users):
 			users.remove(user)
 
 def remove_users_by_id(ids, users):
+	ids_to_remove = []
 	for user in users:
 		if user['id'] in ids:
-			remove_user_by_id(user['id'], users)
+			ids_to_remove.append(user['id'])
+
+	for id in ids_to_remove:
+		remove_user_by_id(id, users)
 
 def add_priority(target, users):
     for user in users:
@@ -69,7 +73,7 @@ def get_last_submitters_since(date, users):
 	if start_index == -1:
 		return []
 
-	last_submitters = users[start_index:start_index+LAST_SUBMITTERS_AMOUNT]
+	last_submitters = users[start_index : start_index+LAST_SUBMITTERS_AMOUNT]
 	for user in last_submitters:
 		remove_user_by_id(user['id'], users)
 
