@@ -1,0 +1,47 @@
+<html>
+	<head>
+		<script src="https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.min.js"></script>
+	</head>
+	<body>
+		<p id="time"></p>
+		<p id="activity"></p>
+		<div id='text'>sdfi</div>
+		<script src='js/watcher.js'></script>
+		<script>
+			let watcher = new Watcher({
+				currentPageName: "my-home-page",
+				websocketOptions: {
+					websocketHost: 'http://netx.ru:8080',
+					appId: "2020"
+				}
+			});
+
+			watcher.callAfterTimeElapsedInSeconds(4, function () {
+				console.log("The user has been using the page for 4 seconds! Let's prompt them with something.");
+			});
+
+			watcher.callAfterTimeElapsedInSeconds(9, function () {
+				console.log("The user has been using the page for 9 seconds! Let's prompt them with something.");
+			});
+
+			document.getElementById('text').addEventListener('copy', (e) => {
+				console.log('copied', document.getSelection().toString(), e);
+			});
+
+			console.log(watcher);
+			window.onload = function () {
+				setInterval(function () {
+					let timeSpentOnPage = watcher.getTimeOnCurrentPageInSeconds();
+					document.getElementById('time').textContent = timeSpentOnPage.toFixed(2);
+
+					if (watcher.isUserCurrentlyOnPage && watcher.isUserCurrentlyIdle === false) {
+						document.getElementById('activity').textContent = "You are actively using this page."
+					} else {
+						document.getElementById('activity').textContent = "You have left the page."
+					}
+				}, 37);
+			}
+
+		</script>
+	</body>
+</html>
