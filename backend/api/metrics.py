@@ -31,6 +31,26 @@ def read_all(userId=None, taskId=None):
     ]
 
 
+def read_one(metricId):
+    """
+    Respond to a GET request for /api/metrics/{metricId}
+
+    :param metricId Id of metric to read
+    :return metric on success or 404
+    """
+    return  {
+        "id": metricId,
+        "userId": 0,
+        "taskId": 0,
+        "taskCopied": True,
+        "taskViewed": True,
+        "readingTime": 0
+    }
+
+    abort(404, f"Metric with metricId: {metricId} does not exists.")
+
+
+
 def create(metric):
     """
     Respond to a POST request for /api/metrics
@@ -41,10 +61,11 @@ def create(metric):
     """
 
     metric['id'] = 0
-    # return metric, 201
+    return metric, 201
 
     abort(
-        409, f"Metric with userId: {metric['userId']} and taskId: {metric['taskId']} already exists."
+        409,
+        f"Metric with userId: {metric['userId']} and taskId: {metric['taskId']} already exists."
     )
 
 

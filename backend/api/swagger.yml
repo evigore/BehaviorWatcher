@@ -59,7 +59,7 @@ paths:
             $ref: '#/definitions/CreateMetricModel'
       responses:
         '200':
-          description: OK.
+          description: Successfully read metric
           schema:
             $ref: '#/definitions/MetricModel'
         '400':
@@ -67,7 +67,7 @@ paths:
           schema:
             $ref: '#/definitions/MetricModel'
         '409':
-          description: Metric already exists
+          description: Specified metric already exists
           schema:
             $ref: '#/definitions/Error'
         '500':
@@ -75,6 +75,36 @@ paths:
           schema:
             $ref: '#/definitions/Error'
 
+  /metrics/{metricId}:
+    get:
+      operationId: api.metrics.read_one
+      description: Get concrete metric by id
+      tags:
+        - Metric
+      produces:
+        - application/json
+      parameters:
+      - name: metricId
+        in: path
+        required: true
+        type: string
+      responses:
+        '200':
+          description: Successfully read metric
+          schema:
+            $ref: '#/definitions/MetricModel'
+        '400':
+          description: Bad request. If some data are strange
+          schema:
+            $ref: '#/definitions/Error'
+        '404':
+          description: Not found
+          schema:
+            $ref: '#/definitions/Error'
+        '500':
+          description: Unexpected error.
+          schema:
+            $ref: '#/definitions/Error'
 
 definitions:
   MetricModel:
