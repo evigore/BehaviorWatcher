@@ -1,0 +1,24 @@
+swagger: "2.0"
+info:
+  description: "Description"
+  version: "1.0.0"
+  title: "BehaviorWatcher"
+  termsOfService: "http://swagger.io/terms/"
+schemes:
+- "https"
+- "http"
+basePath: "/api"
+
+paths:
+  /metrics:
+    get:
+      operationId: api.metrics.read_all
+      tags:
+        - Metric
+      summary: List all metrics.
+      description: List all metrics.
+      responses:
+        200:
+          description: Ok.
+          schema:
+            type: string
