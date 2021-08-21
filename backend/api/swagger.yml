@@ -13,6 +13,8 @@ paths:
   /metrics:
     get:
       operationId: api.metrics.read_all
+      summary: List all metrics
+      description: List all metrics
       tags:
         - Metric
       produces:
@@ -20,56 +22,60 @@ paths:
       parameters:
         - name: userId
           in: query
-          required: False
           type: integer
         - name: taskId
           in: query
-          required: False
           type: integer
-      summary: List all metrics
-      description: List all metrics
       responses:
-        "200":
+        '200':
           description: Successfully read metrics
           schema:
             type: array
             items:
               $ref: "#/definitions/MetricModel"
-        "400":
+        '400':
           description: Bad request. If some data are strange
           schema:
             $ref: "#/definitions/Error"
-        "500":
+        '500':
           description: Unexpected error.
           schema:
             $ref: "#/definitions/Error"
 
     post:
+      operationId: api.metrics.create
+      summary: Create new metric in system.
       description: Create new metric in system.
       tags:
         - Metric
       produces:
-      - application/json
+        - application/json
       parameters:
-      - name: Body
-        in: body
-        required: true
-        description: ''
-        schema:
-          $ref: '#/definitions/CreateMetricModel'
+        - name: metric
+          in: body
+          required: true
+          description: ''
+          schema:
+            $ref: '#/definitions/CreateMetricModel'
       responses:
         '200':
           description: OK.
           schema:
             $ref: '#/definitions/MetricModel'
         '400':
-          description: Bad request. If some data are strange
+          description: Bad request
+          schema:
+            $ref: '#/definitions/MetricModel'
+        '409':
+          description: Metric already exists
           schema:
             $ref: '#/definitions/Error'
         '500':
           description: Unexpected error.
           schema:
             $ref: '#/definitions/Error'
+
+
 definitions:
   MetricModel:
     type: "object"
@@ -95,3 +101,23 @@ definitions:
         type: string
     required:
       - message
+
+  CreateMetricModel:
+    type: "object"
+    properties:
+      userId:
+        type: "integer"
+      taskId:
+        type: "integer"
+      taskCopied:
+        type: "boolean"
+        default: false
+      taskViewed:
+        type: "boolean"
+        default: false
+      readingTime:
+        type: "integer"
+    required:
+      - userId
+      - taskId
+        
