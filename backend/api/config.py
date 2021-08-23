@@ -19,5 +19,5 @@ db = SQLAlchemy(app)
 # [REQUIRED] initialize after db
 ma = Marshmallow(app)
 
-if not os.path.exists("people.db"):
+if not os.path.exists("behaviorWatcher.db"):
     db.create_all()

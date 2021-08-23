@@ -1,4 +1,4 @@
-from config import db
+from config import db, ma
 
 
 class Metric(db.Model):
@@ -25,7 +25,7 @@ class Sender(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, nullable=False)
     # user_id belongs to self, not to self.metric.user_id
-    metric_id = db.Column(db.Integer, db.ForeignKey('metric.id'))# 
+    metric_id = db.Column(db.Integer, db.ForeignKey('metric.id'))
 
     __table_args__ = (db.UniqueConstraint('user_id', 'metric_id', name='_user_metric_uc'), )  # tuple
 
@@ -37,3 +37,24 @@ class Receiver(db.Model):
     metric_id = db.Column(db.Integer, db.ForeignKey('metric.id'))
 
     __table_args__ = (db.UniqueConstraint('user_id', 'metric_id', name='_user_metric_uc'), )  # tuple
+
+
+
+class MetricSchema(ma.SQLAlchemyAutoSchema):
+    class Meta:
+        model = Metric
+        include_fk = True
+
+
+
+class SenderSchema(ma.SQLAlchemyAutoSchema):
+    class Meta:
+        model = Sender
+        include_fk = True
+
+
+
+class ReceiverSchema(ma.SQLAlchemyAutoSchema):
+    class Meta:
+        model = Receiver
+        include_fk = True
