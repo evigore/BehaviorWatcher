@@ -1,4 +1,4 @@
-from config import db, ma
+from api.config import db, ma
 
 
 class Metric(db.Model):
