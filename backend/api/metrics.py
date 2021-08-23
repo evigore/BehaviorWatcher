@@ -31,26 +31,6 @@ def read_all(userId=None, taskId=None):
     ]
 
 
-def read_one(metricId):
-    """
-    Respond to a GET request for /api/metrics/{metricId}
-
-    :param metricId Id of metric to read
-    :return metric on success or 404
-    """
-    return  {
-        "id": metricId,
-        "userId": 0,
-        "taskId": 0,
-        "taskCopied": True,
-        "taskViewed": True,
-        "readingTime": 0
-    }
-
-    abort(404, f"Metric with metricId: {metricId} does not exists.")
-
-
-
 def create(metric: 'dict'):
     """
     Respond to a POST request for /api/metrics
@@ -69,3 +49,46 @@ def create(metric: 'dict'):
     )
 
 
+
+def read_one(metricId):
+    """
+    Respond to a GET request for /api/metrics/{metricId}
+    Returns specified metric
+
+    :param metricId Id of the metric to read
+    :return metric on success or 404
+    """
+    return  {
+        "id": metricId,
+        "userId": 0,
+        "taskId": 0,
+        "taskCopied": True,
+        "taskViewed": True,
+        "readingTime": 0
+    }
+
+    abort(404, f"Metric with metricId: {metricId} does not exists.")
+
+
+
+def patch(metricId, metricData):
+    """
+    Respond to a PATCH request for /api/metrics/{metricId}
+    Patches the metric with the properties of metricData or leaves unchanged
+
+    :param metricId    Id of the metric to update
+    :param metricData Data to update the metric with
+    :return 200 on success
+    """
+    pass
+
+
+def delete(metricId):
+    """
+    Respond to a DELETE request for /api/metrics/{metricId}
+    Deletes the metric
+
+    :param metricId    Id of the metric to update
+    :return 200|204 on success
+    """
+    pass
