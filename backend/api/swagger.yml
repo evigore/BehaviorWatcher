@@ -58,7 +58,7 @@ paths:
           schema:
             $ref: '#/definitions/CreateMetricModel'
       responses:
-        '200':
+        '201':
           description: Successfully read metric
           schema:
             $ref: '#/definitions/MetricModel'

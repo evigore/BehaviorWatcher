@@ -22,8 +22,8 @@ def read_all(userId=None, taskId=None):
     return [
         {
             "id": 0,
-            "userId": taskId,
-            "taskId": userId,
+            "userId": 0,
+            "taskId": 0,
             "taskCopied": True,
             "taskViewed": True,
             "readingTime": 0
@@ -51,7 +51,7 @@ def read_one(metricId):
 
 
 
-def create(metric):
+def create(metric: 'dict'):
     """
     Respond to a POST request for /api/metrics
     Creates new metric with metric data, assigns metric.id
