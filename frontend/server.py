@@ -14,7 +14,7 @@ app.config['SEND_FILE_MAX_AGE_DEFAULT'] = 0
 def send_js(path):
 	return send_from_directory('js', path)
 
-@app.route('/metric/', methods=['PATCH'])
+@app.route('/metric', methods=['POST'])
 def metric():
 	if not request.is_json:
 		abort(400)

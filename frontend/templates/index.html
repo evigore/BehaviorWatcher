@@ -5,33 +5,17 @@
 	<body>
 		<p id="time"></p>
 		<p id="activity"></p>
-		<div id='text'>sdfi</div>
+		<div id='text'>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</div>
 		<script src='js/watcher.js'></script>
 		<script>
-			let watcher = new Watcher({
-				currentPageName: "my-home-page",
-				websocketOptions: {
-					websocketHost: 'http://netx.ru:8080',
-					appId: "2020"
-				}
+			let watcher = new Watcher('http://netx.ru:8080/metric', {
+				currentPageName: 'my-home-page',
+				trackIdWhenCopies: 'text'
 			});
 
-			watcher.callAfterTimeElapsedInSeconds(4, function () {
-				console.log("The user has been using the page for 4 seconds! Let's prompt them with something.");
-			});
-
-			watcher.callAfterTimeElapsedInSeconds(9, function () {
-				console.log("The user has been using the page for 9 seconds! Let's prompt them with something.");
-			});
-
-			document.getElementById('text').addEventListener('copy', (e) => {
-				console.log('copied', document.getSelection().toString(), e);
-			});
-
-			console.log(watcher);
 			window.onload = function () {
 				setInterval(function () {
-					let timeSpentOnPage = watcher.getTimeOnCurrentPageInSeconds();
+					let timeSpentOnPage = watcher.getTimeOnPageInMilliseconds() / 1000;
 					document.getElementById('time').textContent = timeSpentOnPage.toFixed(2);
 
 					if (watcher.isUserCurrentlyOnPage && watcher.isUserCurrentlyIdle === false) {
