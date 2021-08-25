@@ -4,8 +4,8 @@ metric data
 """
 
 from flask import make_response, abort
-from api.config import db
-from api.models import (
+from config import db
+from models import (
     Metric, Sender, Receiver,
     MetricSchema, SenderSchema, ReceiverSchema
 )
@@ -131,3 +131,41 @@ def delete(metricId):
         return make_response(f"Metric with id {metricId} deleted.", 200)
     else:
         abort(404, f"Metric with id {metricId} not found.")
+
+
+
+def read_receivers(metricId):
+    """
+    Respond to a GET request for /api/metrics/{metricId}/receivers
+    Return array of receivers
+
+    :param metricId    Id of the metric to update
+    :return 200|204 on success
+    """
+    metric = Metric.query.filter(Metric.id == metricId).one_or_none()
+    if metric is not None:
+        receivers = Receiver.query.with_parent(metric).all()
+        return receivers_schema.dump(receivers)
+    else:
+        abort(404, f"Metric with id {metricId} not found.")
+
+
+
+def create_receiver(metricId, receiver: '[2, 7]'):
+    """
+    Respond to a POST request for /api/metrics/{metricId}/receivers
+    Add new receiver to concrete metric
+
+    :param metricId    Id of the metric to update
+    :param receiver    Array of 2 numbers (metricId, receiverId) 
+    :return 201 on success, 409 if metric already exists
+    """
+    metric = Metric.query.filter(Metric.id == metricId).one_or_none()
+    if metric is not None:
+        abort(
+            409, f"Metric with user_id: {metric['user_id']} and task_id: {metric['task_id']} already exists."
+        )
+    else:
+        pass  # TODO
+
+
