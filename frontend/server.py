@@ -14,13 +14,28 @@ app.config['SEND_FILE_MAX_AGE_DEFAULT'] = 0
 def send_js(path):
 	return send_from_directory('js', path)
 
+
+readingTime = 0
+
+@app.route('/metric', methods=['GET'])
+def getMetric():
+	global readingTime
+
+	return jsonify({
+		'reading_time': readingTime,
+		'sdf': False
+	})
+
 @app.route('/metric', methods=['POST'])
-def metric():
+def postMetric():
 	if not request.is_json:
 		abort(400)
 
 	data = request.json
 	print(data)
+
+	global readingTime
+	readingTime += int(data['reading_time']);
 
 	return jsonify(data)
 
