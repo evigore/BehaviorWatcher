@@ -1,0 +1,34 @@
+<html>
+	<head>
+		<script src="https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.min.js"></script>
+	</head>
+	<body>
+		<p id="time"></p>
+		<p id="activity"></p>
+		<div id='text'>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</div>
+		<script src='js/watcher.js'></script>
+		<div id='task' style="border-color: red; border-style: solid">Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</div>
+		<script>
+			let watcher = new Watcher('http://netx.ru:8080/metric', {
+				trackIdWhenCopies: 'text',
+				trackIdWhenViews: 'task',
+				user_id: 425,
+				task_id: 2352
+			});
+
+			window.onload = function () {
+				setInterval(function () {
+					let timeSpentOnPage = watcher.getTimeOnPageInMilliseconds() / 1000;
+					document.getElementById('time').textContent = timeSpentOnPage.toFixed(2);
+
+					if (watcher.isUserCurrentlyOnPage && watcher.isUserCurrentlyIdle === false) {
+						document.getElementById('activity').textContent = "You are actively using this page."
+					} else {
+						document.getElementById('activity').textContent = "You have left the page."
+					}
+				}, 37);
+			}
+
+		</script>
+	</body>
+</html>
