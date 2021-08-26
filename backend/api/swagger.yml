@@ -189,7 +189,7 @@ paths:
           schema:
             type: array
             items:
-              $ref: '#/definitions/ReceiverModel'
+              $ref: '#/definitions/User'
         '400':
           description: Bad request. If some data are strange
           schema:
@@ -211,21 +211,18 @@ paths:
         in: path
         required: true
         type: integer
-      - name: receiver
+      - name: receiverData
         in: body
         required: true
         schema:
-          type: array
-          items:
-            type: integer
-          example: [2, 7]
+          $ref: '#/definitions/CreateUser'
       responses:
         '200':
           description: OK.
           schema:
             type: array
             items:
-              $ref: '#/definitions/MetricExtendedModel'  #TODO
+              $ref: '#/definitions/User'
         '400':
           description: Bad request. If some data are strange
           schema:
@@ -235,6 +232,66 @@ paths:
           schema:
             $ref: '#/definitions/Error'
 
+  /metrics/{metricId}/senders:
+    get:
+      operationId: metrics.read_senders
+      description: List of senders of current metric.
+      tags:
+        - Sender
+      produces:
+      - application/json
+      parameters:
+      - name: metricId
+        in: path
+        required: true
+        type: integer
+        description: ''
+      responses:
+        '200':
+          description: OK.
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/User'
+        '400':
+          description: Bad request. If some data are strange
+          schema:
+            $ref: '#/definitions/Error'
+        '500':
+          description: Unexpected error.
+          schema:
+            $ref: '#/definitions/Error'
+
+    post:
+      operationId: metrics.create_sender
+      description: Add senders to current metric
+      tags:
+      - Sender
+      produces:
+      - application/json
+      parameters:
+      - name: metricId
+        in: path
+        required: true
+        type: integer
+      - name: senderData
+        in: body
+        required: true
+        schema:
+          $ref: '#/definitions/CreateUser'
+      responses:
+        '200':
+          description: OK.
+          schema:
+            $ref: '#/definitions/User'
+        '400':
+          description: Bad request. If some data are strange
+          schema:
+            $ref: '#/definitions/Error'
+        '500':
+          description: Unexpected error.
+          schema:
+            $ref: '#/definitions/Error'
 
 
 definitions:
@@ -288,63 +345,33 @@ definitions:
       reading_time:
         type: "integer"        
 
-  ReceiverModel:
+  User:
     type: "object"
     properties:
       id:
-        type: "integer"
-        example: 32
-      metricId:
-        type: "integer"
+        type: integer
+        example: 1
+      user_id:
+        type: integer
         example: 2
-      userId:
-        type: "integer"
+      metric_id:
+        type: integer
         example: 7
     required:
       - id
-      - userId
-      - metricId
+      - user_id
+      - metric_id
 
-  MetricExtendedModel:
-    type: "object"
-    properties:
-      id:
-        type: "integer"
-      userId:
-        type: "integer"
-      taskId:
-        type: "integer"
-      taskCopied:
-        type: "boolean"
-      taskViewed:
-        type: "boolean"
-      readingTime:
-        type: "integer"
-      receivers:
-        type: array
-        items:
-          $ref: '#/definitions/ReceiverModel'
-      senders:
-        type: array
-        items:
-          $ref: '#/definitions/SenderModel'
 
-  SenderModel:
-    type: "object"
+  CreateUser:
+    title: Data to create user with
+    type: object
     properties:
-      id:
-        type: "integer"
+      user_id:
+        type: integer
         example: 2
-      metricId:
-        type: "integer"
-        example: 13
-      userId:
-        type: "integer"
-        example: 9
     required:
-      - id
-      - userId
-      - metricId
+      - user_id
 
   Error:
     title: Error message
