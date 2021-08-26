@@ -53,16 +53,15 @@ def create(metric):
               .one_or_none()
               )
 
-    if result is not None:
-        abort(
-            409, f"Metric with user_id: {metric['user_id']} and task_id: {metric['task_id']} already exists."
-        )
-    else:
+    if result is None:
         new_metric = Metric(**metric)
         db.session.add(new_metric)
         db.session.commit()
 
         return metric_schema.dump(new_metric), 201
+    abort(
+        409, f"Metric with user_id: {metric['user_id']} and task_id: {metric['task_id']} already exists."
+    )
 
 
 def read_one(metricId):
@@ -94,9 +93,9 @@ def patch(metricId, metricData):
     :return 200 on success
     """
     metric = (Metric.query
-              .filter(Metric.id == metricId)
-              .one_or_none()
-              )
+        .filter(Metric.id == metricId)
+        .one_or_none()
+      )
 
     if metric is None:
         abort(404, f"Metric with metricId: {metricId} does not exists.")
@@ -122,12 +121,12 @@ def delete(metricId):
     :return 200 on success, 404 on failure
     """
     metric = Metric.query.filter(Metric.id == metricId).one_or_none()
-    if metric is not None:
+    if metric is None:
+        abort(404, f"Metric with id {metricId} not found.")
+    else:
         db.session.delete(metric)
         db.session.commit()
         return make_response(f"Metric with id {metricId} deleted.", 200)
-    else:
-        abort(404, f"Metric with id {metricId} not found.")
 
 
 
@@ -140,11 +139,10 @@ def read_receivers(metricId):
     :return 200|204 on success
     """
     metric = Metric.query.filter(Metric.id == metricId).one_or_none()
-    if metric is not None:
-        receivers = Receiver.query.with_parent(metric).all()
-        return receivers_schema.dump(receivers), 200
-    else:
+    if metric is None:
         abort(404, f"Metric with id {metricId} not found.")
+    receivers = Receiver.query.with_parent(metric).all()
+    return receivers_schema.dump(receivers), 200
 
 
 
@@ -194,10 +192,9 @@ def read_senders(metricId):
     """
     metric = Metric.query.filter(Metric.id == metricId).one_or_none()
     if metric is not None:
-        senders = Sender.query.with_parent(metric).all()
-        return senders_schema.dump(senders)
-    else:
         abort(404, f"Metric with id {metricId} not found.")
+    senders = Sender.query.with_parent(metric).all()
+    return senders_schema.dump(senders)
 
 
 
