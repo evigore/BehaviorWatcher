@@ -1,6 +1,5 @@
 """
-This is the 'metrics' module and supports all the REST actions for the
-metric data
+HTTP handlers for /metrics route
 """
 
 from flask import make_response, abort
@@ -120,7 +119,7 @@ def delete(metricId):
     Deletes the metric
 
     :param metricId    Id of the metric to update
-    :return 200|204 on success
+    :return 200 on success, 404 on failure
     """
     metric = Metric.query.filter(Metric.id == metricId).one_or_none()
     if metric is not None:
