@@ -12,7 +12,7 @@ basePath: "/api"
 paths:
   /metrics:
     get:
-      operationId: metrics.read_all
+      operationId: api.metrics.read_all
       summary: List all metrics
       description: List all metrics
       tags:
@@ -43,7 +43,7 @@ paths:
             $ref: "#/definitions/Error"
 
     post:
-      operationId: metrics.create
+      operationId: api.metrics.create
       summary: Create new metric in system.
       description: Create new metric in system.
       tags:
@@ -77,7 +77,7 @@ paths:
 
   /metrics/{metricId}:
     get:
-      operationId: metrics.read_one
+      operationId: api.metrics.read_one
       description: Get concrete metric by id
       tags:
         - Metric
@@ -107,7 +107,7 @@ paths:
             $ref: '#/definitions/Error'
 
     patch:
-      operationId: metrics.patch
+      operationId: api.metrics.patch
       description: Edit data for concrete metric
       tags:
         - Metric
@@ -139,7 +139,7 @@ paths:
             $ref: '#/definitions/Error'
 
     delete:
-      operationId: metrics.delete
+      operationId: api.metrics.delete
       description: Delete concrete metric using metricId
       tags:
         - Metric
@@ -171,7 +171,7 @@ paths:
   
   /metrics/{metricId}/receivers:
     get:
-      operationId: metrics.read_receivers
+      operationId: api.metrics.read_receivers
       description: List of receivers of the current metric.
       tags:
         - Receiver
@@ -200,7 +200,7 @@ paths:
             $ref: '#/definitions/Error'
 
     post:
-      operationId: metrics.create_receiver
+      operationId: api.metrics.create_receiver
       description: Add receiver to current metric
       tags:
       - Receiver
@@ -234,7 +234,7 @@ paths:
 
   /metrics/{metricId}/senders:
     get:
-      operationId: metrics.read_senders
+      operationId: api.metrics.read_senders
       description: List of senders of current metric.
       tags:
         - Sender
@@ -263,7 +263,7 @@ paths:
             $ref: '#/definitions/Error'
 
     post:
-      operationId: metrics.create_sender
+      operationId: api.metrics.create_sender
       description: Add senders to current metric
       tags:
       - Sender
@@ -295,7 +295,7 @@ paths:
 
   /receivers/{receiverId}:
     get:
-      operationId: receivers.read_one
+      operationId: api.receivers.read_one
       description: Get concrete receiver
       tags:
         - Receiver
@@ -323,7 +323,7 @@ paths:
             $ref: '#/definitions/Error'
 
     delete:
-      operationId: receivers.delete
+      operationId: api.receivers.delete
       description: Delete concrete receiver
       tags:
         - Receiver
@@ -355,7 +355,7 @@ paths:
 
   /senders/{senderId}:
     get:
-      operationId: senders.read_one
+      operationId: api.senders.read_one
       description: Get concrete sender in system
       tags:
         - Sender
@@ -383,7 +383,7 @@ paths:
             $ref: '#/definitions/Error'
 
     delete:
-      operationId: senders.delete
+      operationId: api.senders.delete
       description: Delete concrete sender
       tags:
         - Sender

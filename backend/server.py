@@ -1,6 +1,6 @@
 from config import connex_app
 
-connex_app.add_api('swagger.yml')  # uses ./swagger.yml
+connex_app.add_api('./api/swagger.yaml')  # uses ./api/swagger.yaml
 
 
 

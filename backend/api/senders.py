@@ -3,8 +3,8 @@ HTTP handlers for /senders route
 """
 
 from flask import make_response, abort
-from config import db
-from models import (
+from db import db
+from api.models import (
         Sender, SenderSchema
 )
 
