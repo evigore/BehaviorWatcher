@@ -1,5 +1,5 @@
-from config import db, ma
-
+import os
+from thirdparty import db, ma
 
 class Metric(db.Model):
     # __tablename__ = 'metric'
@@ -58,3 +58,4 @@ class ReceiverSchema(ma.SQLAlchemyAutoSchema):
     class Meta:
         model = Receiver
         include_fk = True
+
