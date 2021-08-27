@@ -1,0 +1,125 @@
+swagger: "2.0"
+info:
+  description: "Description"
+  version: "1.0.0"
+  title: "BehaviorWatcher"
+  termsOfService: "http://swagger.io/terms/"
+schemes:
+  - "https"
+  - "http"
+basePath: "/api"
+
+paths:
+  /checkUser:
+    get:
+      summary: Check user for antiplagiarism.
+      description: Check user for antiplagiarism.
+      tags:
+        - Antiplag
+      produces:
+        - application/json
+      parameters:
+        - name: Body
+          in: body
+          required: true
+          description: ''
+          schema:
+            $ref: '#/definitions/CheckUser'
+      responses:
+        '200':
+          description: OK
+          schema:
+            $ref: '#/definitions/ResultOfCheck'
+        '409':
+          description: Specified metric already exists
+          schema:
+            $ref: '#/definitions/Error'
+        '500':
+          description: Unexpected error.
+          schema:
+            $ref: '#/definitions/Error'
+
+  /clientUser:
+    post:
+      summary: Create or update metric in system.
+      description: Create or update metric in system.
+      tags:
+        - Antiplag
+      produces:
+        - application/json
+      parameters:
+        - name: Body
+          in: body
+          required: true
+          description: ''
+          schema:
+            $ref: '#/definitions/ClientUser'
+      responses:
+        '200':
+          description: OK
+          schema:
+            type: object
+            properties:
+              message: 
+                type: string
+                example: 'OK'
+        '409':
+          description: Specified metric already exists
+          schema:
+            $ref: '#/definitions/Error'
+        '500':
+          description: Unexpected error.
+          schema:
+            $ref: '#/definitions/Error'
+
+
+definitions:
+  CheckUser:
+    type: "object"
+    properties:
+      user_id:
+        type: "integer"
+      task_id:
+        type: "integer"
+    required:
+      - user_id
+      - task_id
+      
+  ResultOfCheck:
+    type: "object"
+    properties:
+      user_id:
+        type: "integer"
+      task_id:
+        type: "integer"
+    required:
+      - user_id
+      - task_id
+
+  ClientUser:
+    type: "object"
+    properties:
+      user_id:
+        type: "integer"
+      task_id:
+        type: "integer"
+      task_copied:
+        type: "boolean"
+        default: false
+      task_viewed:
+        type: "boolean"
+        default: false
+      reading_time:
+        type: "integer"
+    required:
+      - user_id
+      - task_id
+
+  Error:
+    title: Error message
+    type: object
+    properties:
+      message:
+        type: string
+    required:
+      - message
