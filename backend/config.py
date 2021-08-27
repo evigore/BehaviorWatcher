@@ -16,5 +16,6 @@ ma = Marshmallow()
 db.init_app(app)
 ma.init_app(app)
 
-if not os.path.exists("behaviorWatcher.db"):
-    db.create_all()
+with app.app_context():
+	if not os.path.exists("behaviorWatcher.db"):
+		db.create_all()
