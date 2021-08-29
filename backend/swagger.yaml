@@ -1,0 +1,320 @@
+swagger: "2.0"
+info:
+  description: "Description"
+  version: "1.0.0"
+  title: "BehaviorWatcher"
+  termsOfService: "http://swagger.io/terms/"
+schemes:
+  - "https"
+  - "http"
+basePath: "/api"
+
+paths:
+  /verification/{solutionId}:
+    get:
+      description: Get detailed plagiarism data for specified solution.
+      summary: Get detailed plagiarism data for specified solution.
+      tags:
+      - Verification of solution
+      operationId: UserGet
+      deprecated: false
+      produces:
+      - application/json
+      parameters:
+        - name: solutionId
+          in: path
+          required: true
+          type: integer
+          description: 'task_id and user_id could get from solution_id'
+      responses:
+        '200':
+          description: OK.
+          schema:
+            $ref: '#/definitions/ReviewVerificationModel'
+        '400':
+          description: Bad request. If some data are strange
+          schema:
+            $ref: '#/definitions/Error'
+        '403':
+          description: Permission denied. Authorization token are invalid
+          schema:
+            $ref: '#/definitions/Error'
+        '500':
+          description: Unexpected error.
+          schema:
+            $ref: '#/definitions/Error'
+    post:
+      summary: Check solution for plagiarism.
+      description: Check solution for plagiarism.
+      tags:
+        - Verification of solution
+      produces:
+        - application/json
+      parameters:
+        - name: solutionId
+          in: path
+          required: true
+          type: integer
+          description: 'task_id and user_id could get from solution_id'
+      responses:
+        '200':
+          description: OK
+        '409':
+          description: Specified metric already exists
+          schema:
+            $ref: '#/definitions/Error'
+        '500':
+          description: Unexpected error.
+          schema:
+            $ref: '#/definitions/Error'
+
+  /verification/{solutionId}/verdict:
+    patch:
+      summary: Set status of plagiarism for concrete solution.
+      description: Set status of plagiarism for concrete solution.
+      tags:
+        - Verification of solution
+      produces:
+        - application/json
+      parameters:
+        - name: solutionId
+          in: path
+          required: true
+          type: integer
+          description: 'task_id and user_id could get from solution_id'
+        - name: Body
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/Verdict'
+      responses:
+        '200':
+          description: OK
+        '500':
+          description: Unexpected error.
+          schema:
+            $ref: '#/definitions/Error'
+
+  /metrics:
+    get:
+      operationId: metrics.read_all
+      summary: List all metrics
+      description: List all metrics
+      tags:
+        - Metric
+      produces:
+        - application/json
+      parameters:
+        - name: user_id
+          in: query
+          type: integer
+        - name: task_id
+          in: query
+          type: integer
+      responses:
+        '200':
+          description: Successfully read metrics
+          schema:
+            type: array
+            items:
+              $ref: "#/definitions/MetricModel"
+        '400':
+          description: Bad request. If some data are strange
+          schema:
+            $ref: "#/definitions/Error"
+        '500':
+          description: Unexpected error.
+          schema:
+            $ref: "#/definitions/Error"
+    post:
+      operationId: metrics.create
+      summary: Create new metric or append to existing in system.
+      description: Create new metric or append to existing in system.
+      tags:
+        - Metric
+      produces:
+        - application/json
+      parameters:
+        - name: metric
+          in: body
+          required: true
+          description: ''
+          schema:
+            $ref: '#/definitions/CreateMetricModel'
+      responses:
+        '201':
+          description: Successfully read metric
+          schema:
+            $ref: '#/definitions/MetricModel'
+        '400':
+          description: Bad request
+          schema:
+            $ref: '#/definitions/MetricModel'
+        '500':
+          description: Unexpected error.
+          schema:
+            $ref: '#/definitions/Error'
+
+  /metrics/{metricId}:
+    get:
+      operationId: metrics.read_one
+      description: Get concrete metric by id
+      tags:
+        - Metric
+      produces:
+        - application/json
+      parameters:
+      - name: metricId
+        in: path
+        required: true
+        type: integer
+      responses:
+        '200':
+          description: Successfully read metric
+          schema:
+            $ref: '#/definitions/MetricModel'
+        '400':
+          description: Bad request. If some data are strange
+          schema:
+            $ref: '#/definitions/Error'
+        '404':
+          description: Not found
+          schema:
+            $ref: '#/definitions/Error'
+        '500':
+          description: Unexpected error.
+          schema:
+            $ref: '#/definitions/Error'
+    patch:
+      operationId: metrics.patch
+      description: Edit data for concrete metric
+      tags:
+        - Metric
+      produces:
+      - application/json
+      parameters:
+      - name: metricId
+        in: path
+        required: true
+        type: integer
+      - name: metricData
+        in: body
+        required: true
+        description: 'Data to update the metric with'
+        schema:
+          $ref: '#/definitions/EditMetricModel'
+      responses:
+        '200':
+          description: OK.
+          schema:
+            $ref: '#/definitions/MetricModel'
+        '400':
+          description: Bad request. If some data are strange
+          schema:
+            $ref: '#/definitions/Error'
+        '500':
+          description: Unexpected error.
+          schema:
+            $ref: '#/definitions/Error'
+    delete:
+      operationId: metrics.delete
+      description: Delete concrete metric using metricId
+      tags:
+        - Metric
+      produces:
+      - application/json
+      parameters:
+      - name: metricId
+        in: path
+        required: true
+        type: integer
+      responses:
+        '200':
+          description: OK.
+        '400':
+          description: Bad request. If some data are strange
+          schema:
+            $ref: '#/definitions/Error'
+        '500':
+          description: Unexpected error.
+          schema:
+            $ref: '#/definitions/Error'
+
+definitions:
+  
+  Verdict:
+    type: "object"
+    properties:
+      is_plagiarism:
+        type: "boolean"
+    required:
+      - is_plagiarism
+
+  ReviewVerificationModel:
+    title: Verification model for review by human
+    type: "object"
+    properties:
+      verdict_of_module:
+        type: "string"
+      total_score:
+        type: "number"
+      ...:
+        type: "string"
+
+  MetricModel:
+    type: "object"
+    properties:
+      id:
+        type: "integer"
+      user_id:
+        type: "integer"
+      task_id:
+        type: "integer"
+      task_copied:
+        type: "boolean"
+      task_viewed:
+        type: "boolean"
+      reading_time:
+        type: "integer"
+
+  CreateMetricModel:
+    type: "object"
+    properties:
+      user_id:
+        type: "integer"
+      task_id:
+        type: "integer"
+      task_copied:
+        type: "boolean"
+        default: false
+      task_viewed:
+        type: "boolean"
+        default: false
+      reading_time:
+        type: "integer"
+    required:
+      - user_id
+      - task_id
+
+  EditMetricModel:
+    type: "object"
+    properties:
+      user_id:
+        type: "integer"
+      task_id:
+        type: "integer"
+      task_copied:
+        type: "boolean"
+      task_viewed:
+        type: "boolean"
+      reading_time:
+        type: "integer"        
+
+  Error:
+    title: Error message
+    type: object
+    properties:
+      message:
+        type: string
+    required:
+      - message
