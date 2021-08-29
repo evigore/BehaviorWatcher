@@ -136,7 +136,7 @@ paths:
       produces:
         - application/json
       parameters:
-        - name: metric
+        - name: Body
           in: body
           required: true
           description: ''
@@ -198,7 +198,7 @@ paths:
         in: path
         required: true
         type: integer
-      - name: metricData
+      - name: Body
         in: body
         required: true
         description: 'Data to update the metric with'
