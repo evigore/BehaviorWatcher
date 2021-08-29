@@ -13,12 +13,10 @@ app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 thirdparty.db.init_app(app)
 thirdparty.ma.init_app(app)
 
-print(dir(thirdparty.db))
-
 connex_app.add_api('./swagger.yaml')
 
 with app.app_context():
 	if not os.path.exists("behaviorWatcher.db"):
 		thirdparty.db.create_all()
 
-connex_app.run(debug=True)
+connex_app.run(debug=False)

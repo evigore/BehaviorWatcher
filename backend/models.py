@@ -1,5 +1,7 @@
 import os
+import json
 from thirdparty import db, ma
+from dataclasses import dataclass
 
 class Metric(db.Model):
     # __tablename__ = 'metric'
@@ -37,6 +39,14 @@ class Verification(db.Model):
 	binary_based_score = db.Column(db.Float, nullable=True)
 
 	__table_args__ = (db.UniqueConstraint('source_solution_id', 'destination_solution_id', name='_source_destination_uc'), )  # tuple
+
+
+@dataclass
+class Error:
+    message: str
+
+class ErrorSchema(ma.Schema):
+    message = ma.Str()
 
 
 class MetricSchema(ma.SQLAlchemyAutoSchema):

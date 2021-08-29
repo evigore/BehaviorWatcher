@@ -2,12 +2,15 @@
 HTTP handlers for /metrics route
 """
 
-from flask import make_response, abort
-from thirdparty import db
-from models import (Metric, Verification, MetricSchema, VerificationSchema)
+from flask import make_response, abort, jsonify
+from thirdparty import db, exc, and_
+from models import (
+		Metric, Verification, Error,
+		MetricSchema, VerificationSchema, ErrorSchema)
 
-metric_schema = MetricSchema()
-metrics_schema = MetricSchema(many=True)
+errorSchema = ErrorSchema()
+metricSchema = MetricSchema()
+metricsSchema = MetricSchema(many=True)
 
 
 def read_all(user_id=None, task_id=None):
@@ -15,45 +18,41 @@ def read_all(user_id=None, task_id=None):
     Respond to a GET request for /api/metrics
 
     :return json array of metrics
-        returns array with 1 element when user_id, task_id are specified
     """
-    if user_id is None and task_id is None:
-        metrics = Metric.query.all()
-        return metrics_schema.dump(metrics), 200
+	try:
+        if user_id is None and task_id is None:
+            metrics = Metric.query.all()
+            return metricsSchema.dump(metrics), 200
 
-    if user_id is None:
-        metrics = Metric.query.filter(Metric.task_id == task_id).all()
-        return metrics_schema.dump(metrics), 200
+        if user_id is None:
+            metrics = Metric.query.filter(Metric.task_id == task_id).all()
+            return metricsSchema.dump(metrics), 200
 
-    if task_id is None:
-        metrics = Metric.query.filter(Metric.user_id == user_id).all()
-        return metrics_schema.dump(metrics), 200
+        if task_id is None:
+            metrics = Metric.query.filter(Metric.user_id == user_id).all()
+            return metricsSchema.dump(metrics), 200
+    except Exception:
+        errorSchema.dump(Error('Unexpected error')), 500
 
 
 def create(Body):
     """
     Respond to a POST request for /api/metrics
     Creates new metric with metric data, assigns metric.id
-
-    :return 201 on success, 409 if metric already exists
     """
 
-    result = (Metric.query
-              .filter(Metric.user_id == Body.get('user_id'))
-              .filter(Metric.task_id == Body.get('task_id'))
-              .one_or_none()
-              )
+    try:
+        result = Metric.query.filter(Metric.user_id == Body.get('user_id')).filter(Metric.task_id == Body.get('task_id')).one_or_none()
+        if result is not None:
+            errorSchema.dump(Error(f"Metric with user_id={Body['user_id']} and task_id={Body['task_id']} already exists.")), 400
 
-    if result is None:
-        new_metric = Metric(**Body)
-        db.session.add(new_metric)
+        metric = Metric(**Body)
+        db.session.add(metric)
         db.session.commit()
 
-        return metric_schema.dump(new_metric), 201
-
-    abort(
-        409, f"Metric with user_id: {Body['user_id']} and task_id: {Body['task_id']} already exists."
-    )
+        return metricSchema.dump(metric), 200
+    except Exception:
+        return errorSchema.dump(Error("Unexpected error")), 500
 
 
 def read_one(metricId):
@@ -64,15 +63,15 @@ def read_one(metricId):
     :param metricId Id of the metric to read
     :return metric on success or 404
     """
-    metric = (Metric.query
-              .filter(Metric.id == metricId)
-              .one_or_none()
-              )
 
-    if metric is None:
-        abort(404, f"Metric with metricId: {metricId} does not exists.")
-    else:
-        return metric_schema.dump(metric), 200
+    try:
+        metric = Metric.query.filter(Metric.id == metricId).one_or_none()
+        if metric is None:
+            errorSchema.dump(Error(f"Metric with metricId: {metricId} does not exists")), 400
+
+        return metricSchema.dump(metric), 200
+    except Exception:
+        return errorSchema.dump(Error("Unexpected error")), 500
 
 
 def patch(metricId, Body):
@@ -82,28 +81,27 @@ def patch(metricId, Body):
 
     :param metricId             Id of the metric to update
     :param Body		            Data to update the metric with
-    :return 200 on success
     """
 
-    metric = (Metric.query
-              .filter(Metric.id == metricId)
-              .one_or_none()
-              )
+    try:
+        metric = (Metric.query.filter(Metric.id == metricId).one_or_none())
+        if metric is None:
+            return errorSchema.dump(Error(f"Metric with metricId: {metricId} does not exists")), 400
 
-    if metric is None:
-        abort(404, f"Metric with metricId: {metricId} does not exists.")
+        metric.user_id = Body.get('user_id')
+        metric.task_id = Body.get('task_id')
+        metric.reading_time = Body.get('reading_time')
+        metric.task_viewed = Body.get('task_viewed')
+        metric.task_copied = Body.get('task_copied')
 
-    #TODO if options are unset don't change metric
-    metric.user_id = Body.get('user_id')
-    metric.task_id = Body.get('task_id')
-    metric.reading_time = Body.get('reading_time')
-    metric.task_viewed = Body.get('task_viewed')
-    metric.task_copied = Body.get('task_copied')
+        db.session.add(metric)
+        db.session.commit()
 
-    db.session.add(metric)
-    db.session.commit()
-
-    return metric_schema.dump(metric), 200
+        return metricSchema.dump(metric), 200
+    except exc.IntegrityError:
+        return errorSchema.dump(Error(f"Metric with user_id={metric.user_id} and task_id={metric.task_id} already exists")), 400
+    except Exception:
+        return errorSchema.dump(Error("Unexpected error")), 500
 
 
 def delete(metricId):
@@ -112,12 +110,19 @@ def delete(metricId):
     Deletes the metric
 
     :param metricId    Id of the metric to update
-    :return 200 on success, 404 on failure
     """
-    metric = Metric.query.filter(Metric.id == metricId).one_or_none()
-    if metric is None:
-        abort(404, f"Metric with id {metricId} not found.")
-    else:
+
+
+    try:
+        metric = Metric.query.filter(Metric.id == metricId).one_or_none()
+        if metric is None:
+            return errorSchema.dump(Error(f"Metric with id {metricId} not found")), 400
+
         db.session.delete(metric)
         db.session.commit()
-        return make_response(f"Metric with id {metricId} deleted.", 200)
+
+        return errorSchema.dump(Error("OK")), 200
+    except Exception:
+        return errorSchema.dump(Error("Unexpected error")), 500
+
+
