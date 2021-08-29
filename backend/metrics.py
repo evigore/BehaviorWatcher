@@ -4,7 +4,7 @@ HTTP handlers for /metrics route
 
 from flask import make_response, abort
 from thirdparty import db
-from api.models import (Metric, Verification, MetricSchema, VerificationSchema)
+from models import (Metric, Verification, MetricSchema, VerificationSchema)
 
 metric_schema = MetricSchema()
 metrics_schema = MetricSchema(many=True)
