@@ -14,6 +14,7 @@ paths:
     get:
       description: Get detailed plagiarism data for specified solution.
       summary: Get detailed plagiarism data for specified solution.
+      operationId: verifications.get_verification_of_solution
       tags:
       - Verification of solution
       produces:
@@ -44,6 +45,7 @@ paths:
     post:
       summary: Check solution for plagiarism.
       description: Check solution for plagiarism.
+      operationId: verifications.post_verification_of_solution
       tags:
         - Verification of solution
       produces:
@@ -70,6 +72,7 @@ paths:
     patch:
       summary: Set status of plagiarism for concrete solution.
       description: Set status of plagiarism for concrete solution.
+      operationId: verifications.patch_verdict
       tags:
         - Verification of solution
       produces:
