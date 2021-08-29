@@ -6,33 +6,42 @@ from flask import make_response, abort
 from thirdparty import db
 from models import (Verification, VerificationSchema)
 
-def get_verification_of_solution(solutionId):
-	pass
+verification_schema = VerificationSchema()
+verifications_schema = VerificationSchema(many=True)
 
-def post_verification_of_solution(solutionId):
-	pass
 
-def patch_verdict_of_solution(solutionId):
-	pass
-	metric = (Metric.query
-		.filter(Metric.id == metricId)
-		.one_or_none()
-	)
+def get_one(solutionId):
+    """
+    Respond to a GET request for /verifications/{solutionId}
+    Returns specified verification
 
-	if metric is None:
-		abort(404, f"Metric with metricId: {metricId} does not exists.")
+    :param solutionId           Id of the verification to return
+    :return (verification, 200) | (404)
+    """
+    verification = (Verification.query
+                    .filter(Verification.id == solutionId)
+                    .one_or_none()
+                    )
+    if verification is None:
+        abort(404, f"Metric with metricId: {solutionId} does not exists.")
 
-	metric.user_id = metricData.get('user_id')
-	metric.task_id = metricData.get('task_id')
-	metric.reading_time = metricData.get('reading_time')
-	metric.task_viewed = metricData.get('task_viewed')
-	metric.task_copied = metricData.get('task_copied')
+    return verification_schema.dump(verification), 200
 
-	db.session.add(metric)
-	db.session.commit()
 
-	return metric_schema.dump(metric), 200
+def post(solutionId):
+    """
+    Does some strange shit that I don't know about
+    """
+    pass
 
+
+def patch(solutionId, Body):
+    """
+    Partionally update the verification with data in Body
+
+    :return (verification, 200) | 404
+    """
+    pass
 
 
 """
@@ -70,7 +79,7 @@ def delete(senderId):
     return make_response(f"Sender with id {senderId} deleted.", 200)
 	"""
 
-#def read_senders(metricId):
+# def read_senders(metricId):
 """
     Respond to a GET request for /api/metrics/{metricId}/senders
     Return array of senders
@@ -86,8 +95,7 @@ def delete(senderId):
 	"""
 
 
-
-#def create_sender(metricId, senderData):
+# def create_sender(metricId, senderData):
 """
     Respond to a POST request for /api/metrics/{metricId}/sender
     Add new receiver to concrete metric
