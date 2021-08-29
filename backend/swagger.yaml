@@ -72,7 +72,7 @@ paths:
     patch:
       summary: Set status of plagiarism for concrete solution.
       description: Set status of plagiarism for concrete solution.
-      operationId: verifications.patch_verdict
+      operationId: verifications.patch_verdict_of_solution
       tags:
         - Verification of solution
       produces:
