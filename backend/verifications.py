@@ -4,11 +4,10 @@ HTTP handlers for /verification route
 
 from flask import make_response, abort
 from thirdparty import db
-from models import (Verification, VerificationSchema)
+from models import (Verification Error, VerificationSchema, ErrorSchema)
 
-verification_schema = VerificationSchema()
-verifications_schema = VerificationSchema(many=True)
-
+errorSchema = ErrorSchema()
+verificationSchema = VerificationSchema()
 
 def get_one(solutionId):
     """
@@ -18,20 +17,38 @@ def get_one(solutionId):
     :param solutionId           Id of the verification to return
     :return (verification, 200) | (404)
     """
-    verification = (Verification.query
-                    .filter(Verification.id == solutionId)
-                    .one_or_none()
-                    )
-    if verification is None:
-        abort(404, f"Metric with metricId: {solutionId} does not exists.")
+	
+    #verification = Verification.query.filter(Verification.id == solutionId).one_or_none()
+    #if verification is None:
+        #errorSchema.dump(Error(f"Metric with metricId: {solutionId} does not exists")), 400
 
-    return verification_schema.dump(verification), 200
+    #return verificationSchema.dump(verification), 200
+	
+	# 1. Get solution entity with userId, task, etc from other DB
+	# 2. Get another data
+	# 4. Calculate something
+	# 5. ...
+	# 6. Magic
+	# 7. Profit
+
+	# 1. K
+	# 2. I
+	# 4. L
+	# 5. L
+	# 6. M
+	# 7. E
 
 
 def post(solutionId):
     """
     Does some strange shit that I don't know about
     """
+
+	# 1. Get solution entity with userId, task, etc from other DB
+	# 2. filter users (filter.py)
+	# 3. call API of other module
+	# 4. save result to our DB (especially to Verification TABLE)
+	# 5. Is it all?
     pass
 
 
@@ -41,12 +58,14 @@ def patch(solutionId, Body):
 
     :return (verification, 200) | 404
     """
+	# 1. If is_plagiarism == TRUE, then: for all verifications WHERE destination_solution_id == solutionId SET verdict_of_human=TRUE
+	# 2. Else: DELETE Verifications WHERE destination_solution_id == solutionId
     pass
 
 
 """
-verification_schema = VerificationSchema()
-verifications_schema = VerificationSchema(many=True)
+verificationSchema = VerificationSchema()
+verificationsSchema = VerificationSchema(many=True)
 
 def read_one(senderId):
 """
@@ -60,7 +79,7 @@ def read_one(senderId):
     if sender is None:
         abort(404, f"Sender with id: {senderId} doesn't exist.")
 
-    return sender_schema.dump(sender), 200
+    return senderSchema.dump(sender), 200
 
 
 def delete(senderId):
@@ -91,7 +110,7 @@ def delete(senderId):
     if metric is not None:
         abort(404, f"Metric with id {metricId} not found.")
     senders = Sender.query.with_parent(metric).all()
-    return senders_schema.dump(senders)
+    return sendersSchema.dump(senders)
 	"""
 
 
