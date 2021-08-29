@@ -16,8 +16,6 @@ paths:
       summary: Get detailed plagiarism data for specified solution.
       tags:
       - Verification of solution
-      operationId: UserGet
-      deprecated: false
       produces:
       - application/json
       parameters:
