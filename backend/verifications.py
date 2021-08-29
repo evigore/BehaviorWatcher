@@ -14,6 +14,26 @@ def post_verification_of_solution(solutionId):
 
 def patch_verdict_of_solution(solutionId):
 	pass
+	metric = (Metric.query
+		.filter(Metric.id == metricId)
+		.one_or_none()
+	)
+
+	if metric is None:
+		abort(404, f"Metric with metricId: {metricId} does not exists.")
+
+	metric.user_id = metricData.get('user_id')
+	metric.task_id = metricData.get('task_id')
+	metric.reading_time = metricData.get('reading_time')
+	metric.task_viewed = metricData.get('task_viewed')
+	metric.task_copied = metricData.get('task_copied')
+
+	db.session.add(metric)
+	db.session.commit()
+
+	return metric_schema.dump(metric), 200
+
+
 
 """
 verification_schema = VerificationSchema()
