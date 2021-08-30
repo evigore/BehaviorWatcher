@@ -98,7 +98,7 @@ paths:
 
   /metrics:
     get:
-      operationId: metrics.read_all
+      operationId: metrics.get
       summary: List all metrics
       description: List all metrics
       tags:
@@ -128,7 +128,7 @@ paths:
           schema:
             $ref: "#/definitions/Error"
     post:
-      operationId: metrics.create
+      operationId: metrics.post
       summary: Create new metric or append to existing in system.
       description: Create new metric or append to existing in system.
       tags:
@@ -158,7 +158,7 @@ paths:
 
   /metrics/{metricId}:
     get:
-      operationId: metrics.read_one
+      operationId: metrics.get_one
       description: Get concrete metric by id
       tags:
         - Metric

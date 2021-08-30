@@ -4,7 +4,7 @@ HTTP handlers for /verification route
 
 from flask import make_response, abort
 from thirdparty import db
-from models import (Verification Error, VerificationSchema, ErrorSchema)
+from models import (Verification, Error, VerificationSchema, ErrorSchema)
 
 errorSchema = ErrorSchema()
 verificationSchema = VerificationSchema()
