@@ -2,12 +2,80 @@
 HTTP handlers for /verification route
 """
 
-from flask import make_response, abort
 from thirdparty import db
+import filter
+import json
 from models import (Verification, Error, VerificationSchema, ErrorSchema)
 
 errorSchema = ErrorSchema()
 verificationSchema = VerificationSchema()
+
+apiResponse = """{
+    "Version": "1",
+    "SolutionID": "original.py",
+    "MaxSimilarity": 0.9806427276796765,
+    "MaxSimilaritySolutionID": "different_comments.py",
+    "Verdict": "CLEAR POSITIVE",
+    "Scores": [
+        {
+            "SolutionID": "different_comments.py",
+            "TotalScore": 0.9806427276796765,
+            "TextBasedScore": 1,
+            "TokenBasedScore": 0.9955476522445679,
+            "MetricBasedScore": 0.9444444444444444,
+            "BinaryBasedScore": 0.9825788140296936,
+            "TreeBasedScore": null
+        },
+        {
+            "SolutionID": "reformatted.py",
+            "TotalScore": 0.971757612294621,
+            "TextBasedScore": 0.9889094233512878,
+            "TokenBasedScore": 0.9714533090591431,
+            "MetricBasedScore": 0.9444444444444444,
+            "BinaryBasedScore": 0.9822232723236084,
+            "TreeBasedScore": null
+        },
+        {
+            "SolutionID": "renamed_variables.py",
+            "TotalScore": 0.9180482551455498,
+            "TextBasedScore": 0.7295423150062561,
+            "TokenBasedScore": 1,
+            "MetricBasedScore": 1,
+            "BinaryBasedScore": 0.942650705575943,
+            "TreeBasedScore": null
+        },
+        {
+            "SolutionID": "reordered.py",
+            "TotalScore": 0.9036459699273109,
+            "TextBasedScore": 0.8485981523990631,
+            "TokenBasedScore": 0.9040516316890717,
+            "MetricBasedScore": 1,
+            "BinaryBasedScore": 0.861934095621109,
+            "TreeBasedScore": null
+        },
+        {
+            "SolutionID": "with_additional_imports.py",
+            "TotalScore": 0.8646872325075997,
+            "TextBasedScore": 0.8857616186141968,
+            "TokenBasedScore": 0.9573742747306824,
+            "MetricBasedScore": 0.8888888888888888,
+            "BinaryBasedScore": 0.7267241477966309,
+            "TreeBasedScore": null
+        },
+        {
+            "SolutionID": "with_functions.py",
+            "TotalScore": 0.5494582574400637,
+            "TextBasedScore": 0.4490084946155548,
+            "TokenBasedScore": 0.679684579372406,
+            "MetricBasedScore": 0.7222222222222222,
+            "BinaryBasedScore": 0.3469177335500717,
+            "TreeBasedScore": null
+        }
+    ]
+}"""
+
+
+
 
 def get_one(solutionId):
     """
@@ -40,112 +108,55 @@ def get_one(solutionId):
 
 
 def post(solutionId):
-    """
-    Does some strange shit that I don't know about
-    """
+	try:
+		# 1. Get solution entity with userId, task, etc from other DB
+		solutionId = 1
 
-	# 1. Get solution entity with userId, task, etc from other DB
-	# 2. filter users (filter.py)
-	# 3. call API of other module
-	# 4. save result to our DB (especially to Verification TABLE)
-	# 5. Is it all?
-    pass
+		# 2. filter users (filter.py)
+		filter(solutionId)
+
+		# 3. call API of other module
+
+		# apiResponse = request(...) # TODO: real request
+		response = json.loads(apiResponse)
+		for i in response['Scores']:
+			verification = Verification(**{
+				'source_solution_id': i['SolutionID'],
+				'destination_solution_id': solutionId,
+				'source_user_id': 4, # TODO: change to real id
+				'destination_user_id': 6, # TODO: change to real id
+				'task_id': 59, # TODO: change to real id
+				'verdict_of_module': response['Verdict'],
+				'total_score': i['TotalScore'],
+				'text_based_score': i['TextBasedScore'],
+				'token_based_score': i['TokenBasedScore'],
+				'metric_based_score': i['MetricBasedScore'],
+				'binary_based_score': i['BinaryBasedScore'],
+				'tree_based_score': i['TreeBasedScore']
+			})
+
+			db.session.add(verification)
+
+		# 4. save result to our DB (especially to Verification TABLE)
+		db.session.commit()
+
+		return errorSchema.dump(Error("OK")), 200
+	except Exception as e:
+		print(str(e)) # TODO: delete
+		return errorSchema.dump(Error("Unexpected error")), 500
 
 
 def patch(solutionId, Body):
-    """
-    Partionally update the verification with data in Body
+	try: 
+		if Body.get('is_plagiarism'):
+			Verification.query.filter(Verification.destination_solution_id == solutionId).update({Verification.verdict_of_human: True})
+		else:
+			Verification.query.filter(Verification.destination_solution_id == solutionId).delete();
 
-    :return (verification, 200) | 404
-    """
-	# 1. If is_plagiarism == TRUE, then: for all verifications WHERE destination_solution_id == solutionId SET verdict_of_human=TRUE
-	# 2. Else: DELETE Verifications WHERE destination_solution_id == solutionId
-    pass
-
-
-"""
-verificationSchema = VerificationSchema()
-verificationsSchema = VerificationSchema(many=True)
-
-def read_one(senderId):
-"""
-"""
-    Respond to a GET request for /senders/{senderId}
-
-    :return User object
-    """"""
-    sender = Sender.query.filter(Sender.id == senderId).one_or_none()
-
-    if sender is None:
-        abort(404, f"Sender with id: {senderId} doesn't exist.")
-
-    return senderSchema.dump(sender), 200
+		db.session.commit()
+		return errorSchema.dump(Error("OK")), 200
+	except Exception:
+		return errorSchema.dump(Error("Unexpected error")), 500
 
 
-def delete(senderId):
-	""""""
-    Respond to a DELETE request for /senders/{senderId}
 
-    :param                  senderId - id of sender 
-    :return                 200 on success, 404 on failure
-    """"""
-    sender = Sender.query.filter(Sender.id == senderId).one_or_none()
-    if sender is None:
-        abort(404, f"Sender with id: {senderId} doesn't exist.")
-
-    db.session.delete(sender)
-    db.session.commit()
-    return make_response(f"Sender with id {senderId} deleted.", 200)
-	"""
-
-# def read_senders(metricId):
-"""
-    Respond to a GET request for /api/metrics/{metricId}/senders
-    Return array of senders
-
-    :param metricId                         Id of the metric to update
-    :return 200|204 on success
-    """"""
-    metric = Metric.query.filter(Metric.id == metricId).one_or_none()
-    if metric is not None:
-        abort(404, f"Metric with id {metricId} not found.")
-    senders = Sender.query.with_parent(metric).all()
-    return sendersSchema.dump(senders)
-	"""
-
-
-# def create_sender(metricId, senderData):
-"""
-    Respond to a POST request for /api/metrics/{metricId}/sender
-    Add new receiver to concrete metric
-
-    :param metricId         Id of the metric to update
-    :param senderData       Object with 1 property (user_id) 
-    :return 201 on success, 409 if metric already exists
-    """"""
-    metric = Metric.query.filter(Metric.id == metricId).one_or_none()
-
-    if metric is None:
-        abort(
-            409, f"Metric with metricId: {metricId} doesn't exists."
-        )
-    
-    user_id = senderData.get('user_id')
-    sender = (Sender.query
-        .with_parent(metric)
-        .filter(Sender.user_id == user_id)
-        .filter(Sender.metric_id == metricId)
-        .one_or_none()
-    )
-
-    if sender is not None:
-        abort(
-            409, f"Metric {metricId} already has sender with user_id: {user_id}, metric_id: {metricId}"
-        )
-
-    sender = Sender(user_id=user_id, metric_id=metricId)
-    metric.senders.append(sender)
-    db.session.add(sender)
-    db.session.commit()
-    return senderData, 201
-	"""

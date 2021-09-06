@@ -1,110 +1,138 @@
 from generator import *
-# from filter_tools import *
-import datetime
-
-
-import datetime
+from thirdparty import db
+from models import (Metric, Verification, Error, VerificationSchema, ErrorSchema)
+import metrics
+from datetime import datetime, timedelta
+import sys
 
 SUSPECT_AMOUNT = 30
-FACULTY_RATIO = 0.8
-REPUTATION_RATIO = 0.1
-LAST_SUBMITTERS_RATIO = 0.1
+
+LAST_SOLUTIONS_RATIO = 0.8
+RATING_RATIO = 0.2
+
+LAST_SOLUTIONS_AMOUNT = round(SUSPECT_AMOUNT * LAST_SOLUTIONS_RATIO)
+RATING_AMOUNT = round(SUSPECT_AMOUNT * RATING_RATIO)
 
 
-FACULTY_AMOUNT = round(SUSPECT_AMOUNT * FACULTY_RATIO)
-REPUTATION_AMOUNT = round(SUSPECT_AMOUNT * REPUTATION_RATIO)
-LAST_SUBMITTERS_AMOUNT = round(SUSPECT_AMOUNT * LAST_SUBMITTERS_RATIO)
+def remove_solutions_by_id(solutions, ids):
+	l = []
+
+	for solution in solutions:
+		if solution['Id'] not in ids:
+			l.append(solution)
+
+	solutions.clear()
+	solutions.extend(l)
 
 
+def get_priority_solutions_ids(solutions):
+	# TODO: Change 5 to target.user_id
+	priority_verifications = Verification.query.filter(Verification.destination_user_id.like(5) & Verification.verdict_of_human.is_(True)).all()
+	priority_users_ids = set([i.source_user_id for i in priority_verifications])
 
-def filter_users(target, users):
-	filtered_users = []
+	priority_solutions_ids = []
+	for solution in solutions:
+		if solution['OwnerId'] in priority_users_ids:
+			priority_solutions_ids.append(solution['Id'])
 
-	for user in users:
-		if not user['test_passed']:
-			continue
-
-		if user['university_id'] != target['university_id']:
-			continue
-
-		if user['faculty_id'] != target['faculty_id']:
-			continue
-
-		if user['language_id'] != target['language_id']:
-			continue
-
-		if user['course_year'] < target['course_year']:
-			continue
-
-		filtered_users.append(user)
-
-	return filtered_users
+	return priority_solutions_ids
 
 
-def remove_user_by_id(id, users):
-	for user in users:
-		if user['id'] == id:
-			users.remove(user)
-
-def remove_users_by_id(ids, users):
-	ids_to_remove = []
-	for user in users:
-		if user['id'] in ids:
-			ids_to_remove.append(user['id'])
-
-	for id in ids_to_remove:
-		remove_user_by_id(id, users)
-
-def add_priority(target, users):
-    for user in users:
-        priority = 4
-        if target['course_year'] == user['course_year']:
-            priority += 5
-        priority -= user['course_year']
-        user['priority'] = priority
-
-
-def get_last_submitters_since(date, users):
-	users.sort(reverse=False, 
-		key=lambda user: datetime.date.fromisoformat(user['sending_task_time'])
-	)
+def get_last_solutions_since(date, solutions):
+	solutions.sort(reverse=True, key=lambda i: i['CreatedAt'])
 
 	start_index = -1
-	for i, user in enumerate(users):
-		if user['sending_task_time'] <= date:
+	for i, solution in enumerate(solutions):
+		if solution['CreatedAt'] <= date:
 			start_index = i
 			break
 
 	if start_index == -1:
 		return []
 
-	last_submitters = users[start_index : start_index+LAST_SUBMITTERS_AMOUNT]
-	for user in last_submitters:
-		remove_user_by_id(user['id'], users)
-
-	return last_submitters
-
-def get_users_by_reputation(users):
-    pass
+	return solutions[start_index:]
 
 
+def get_top_solutions_ids_by_rating(solutions):
+	users_ratings = {}
+	for id in set([i['OwnerId'] for i in solutions]):
+		users_ratings[id] = get_user_rating(id)
+
+	for i in solutions:
+		i['Rating'] = users_ratings[i['OwnerId']]
+
+	solutions.sort(reverse=True, key=lambda i: i['Rating'])
+
+	top_solutions_ids = []
+	for solution in solutions[0:RATING_AMOUNT]:
+		#if solution['Rating'] == 0: # TODO: uncomment
+			#break
+
+		top_solutions_ids.append(solution['Id'])
+
+	return top_solutions_ids
 
 
+def fetch(result):
+	tmp = []
+
+	for i in result:
+		solution = {key: value for key, value in i.items()}
+		solution['CreatedAt'] = datetime.strptime(solution['CreatedAt'].split('.')[0], '%Y-%m-%d %H:%M:%S') # TODO: remove
+		tmp.append(solution)
+
+	return tmp
+
+def get_user_rating(id):
+	sources = len(Verification.query.filter(Verification.destination_user_id.like(id) & Verification.verdict_of_human.is_(True)).all())
+	destinations = len(Verification.query.filter(Verification.source_user_id.like(id) & Verification.verdict_of_human.is_(True)).all())
+
+	if sources+destinations == 0:
+		return 0
+
+	sources = sources * sources
+	return (destinations-sources) / (destinations+sources)
 
 
-# Prepare data
-users = load_users_from_file("users")
-target = users[1]
-users.remove(target)
-users = filter_users(target, users)
-add_priority(target, users)
-remove_users_by_id(target['stole_from'], users)
+def main(target_solution_id):
+	# TODO: Use real target solution id
+	#target_solution = db.engine.execute("SELECT * FROM Solution WHERE Id=:id FailedTest IS NULL", {'id': target_solution_id}).first()
+	target_solution = fetch(db.engine.execute("SELECT * FROM Solution WHERE TestTaskId='ff1636d5-0aab-479c-9aa2-b14271d8cdf2' AND FailedTest IS NULL LIMIT 1"))
+	if len(target_solution) == 0:
+		return
+	target_solution = target_solution[0]
 
 
-# Sort by date and select last submitters since date
-last_submitters = get_last_submitters_since(target['sending_task_time'], users)
+	solutions = fetch(db.engine.execute("SELECT Id, OwnerId, CreatedAt FROM Solution WHERE FailedTest IS NULL AND OwnerId<>:user_id AND TestTaskId=:task_id AND ProgramingLanguageId=:language_id", {
+		'user_id': target_solution['OwnerId'],
+		'task_id': target_solution['TestTaskId'],
+		'language_id': target_solution['ProgramingLanguageId']
+	})) # TODO: also check by class_id/university_id later. target.createdat < i.createdAt
 
-# Sort by reputation and select with least amount
+	solutions = get_last_solutions_since(target_solution['CreatedAt'], solutions)
 
 
-# Select most local students to target by priority
+	priority_solutions_ids = get_priority_solutions_ids(solutions)
+	remove_solutions_by_id(solutions, priority_solutions_ids)
+
+	# TODO: Check to other classes
+	top_solutions_ids = get_top_solutions_ids_by_rating(solutions)
+	remove_solutions_by_id(solutions, top_solutions_ids)
+
+
+	# TODO: Check to other classes
+	solutions.sort(reverse=True, key=lambda i: i['CreatedAt'])
+	last_solutions = solutions[0:LAST_SOLUTIONS_AMOUNT]
+	last_solutions_ids = [solution['Id'] for solution in solutions]
+
+
+	# Compose all solutions ids
+	solutions_ids = priority_solutions_ids
+	solutions_ids.extend(top_solutions_ids)
+	solutions_ids.extend(last_solutions_ids)
+
+	return solutions_ids # TODO: add users_ids and solutions
+
+
+if __name__ != '__main__':
+	sys.modules[__name__] = main

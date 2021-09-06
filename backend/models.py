@@ -14,9 +14,6 @@ class Metric(db.Model):
     task_copied = db.Column(db.Boolean, server_default=db.false())
     task_viewed = db.Column(db.Boolean, server_default=db.false())
 
-    # One-to-Many
-    verifications = db.relationship('Verification', backref='metric', lazy=True)
-
     # Unique pair of (user_id, task_id)
     __table_args__ = (db.UniqueConstraint('user_id', 'task_id', name='_user_task_uc'), )  # tuple
 
@@ -26,7 +23,9 @@ class Verification(db.Model):
 	source_solution_id = db.Column(db.Integer, nullable=False)
 	destination_solution_id = db.Column(db.Integer, nullable=False)
 
-	metric_id = db.Column(db.Integer, db.ForeignKey('metric.id'))
+	source_user_id = db.Column(db.Integer, nullable=False)
+	destination_user_id = db.Column(db.Integer, nullable=False)
+	task_id = db.Column(db.Integer, nullable=False)
 
 	verdict_of_module = db.Column(db.String, nullable=True)
 	verdict_of_human = db.Column(db.Boolean, server_default=db.false())

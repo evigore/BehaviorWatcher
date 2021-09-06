@@ -20,3 +20,5 @@ with app.app_context():
 		thirdparty.db.create_all()
 
 connex_app.run(debug=False)
+
+
