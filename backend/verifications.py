@@ -75,12 +75,12 @@ apiResponse = """{
 }"""
 
 
-def get_one(solutionId):
+def get_one(solution_id):
     """
     Respond to a GET request for /verifications/{solutionId}
     Returns specified verification
 
-    :param solutionId           Id of the verification to return
+    :param solution_id           Id of the verification to return
     :return (verification, 200) | (404)
     """
 
@@ -106,13 +106,13 @@ def get_one(solutionId):
 # 7. E
 
 
-def post(solutionId):
+def post(solution_id):
     try:
         # 1. Get solution entity with userId, task, etc from other DB
-        solutionId = 1
+        solution_id = 1
 
         # 2. filter users (filter.py)
-        filter(solutionId)
+        filter(solution_id)
 
         # 3. call API of other module
 
@@ -121,7 +121,7 @@ def post(solutionId):
         for i in response['Scores']:
             verification = Verification(**{
                 'source_solution_id': i['SolutionID'],
-                'destination_solution_id': solutionId,
+                'destination_solution_id': solution_id,
                 'source_user_id': 4,  # TODO: change to real id
                 'destination_user_id': 6,  # TODO: change to real id
                 'task_id': 59,  # TODO: change to real id
@@ -145,13 +145,13 @@ def post(solutionId):
         return errorSchema.dump(Error("Unexpected error")), 500
 
 
-def patch(solutionId, Body):
+def patch(solution_it, body):
     try:
-        if Body.get('is_plagiarism'):
-            Verification.query.filter(Verification.destination_solution_id == solutionId).update(
+        if body.get('is_plagiarism'):
+            Verification.query.filter(Verification.destination_solution_id == solution_it).update(
                 {Verification.verdict_of_human: True})
         else:
-            Verification.query.filter(Verification.destination_solution_id == solutionId).delete();
+            Verification.query.filter(Verification.destination_solution_id == solution_it).delete();
 
         db.session.commit()
         return errorSchema.dump(Error("OK")), 200

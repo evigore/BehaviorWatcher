@@ -19,7 +19,7 @@ readingTime = 0
 
 
 @app.route('/metric', methods=['GET'])
-def getMetric():
+def get_metric():
     global readingTime
 
     return jsonify({
@@ -29,7 +29,7 @@ def getMetric():
 
 
 @app.route('/metric', methods=['POST'])
-def postMetric():
+def post_metric():
     if not request.is_json:
         abort(400)
 
@@ -37,7 +37,7 @@ def postMetric():
     print(data)
 
     global readingTime
-    readingTime += int(data['reading_time']);
+    readingTime += int(data['reading_time'])
 
     return jsonify(data)
 

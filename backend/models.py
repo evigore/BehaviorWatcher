@@ -37,7 +37,8 @@ class Verification(db.Model):
     binary_based_score = db.Column(db.Float, nullable=True)
 
     __table_args__ = (
-    db.UniqueConstraint('source_solution_id', 'destination_solution_id', name='_source_destination_uc'),)  # tuple
+        db.UniqueConstraint('source_solution_id', 'destination_solution_id', name='_source_destination_uc'),
+    )  # tuple
 
 
 @dataclass

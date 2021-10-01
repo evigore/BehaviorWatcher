@@ -77,11 +77,11 @@ apiResponse = """{
 }"""
 
 
-def get_one(solutionId):
+def get_one(solution_id):
     try:
         # get user id and task id
         verification = Verification.query.filter(
-            Verification.destination_solution_id.like(solutionId) & Verification.verdict_of_human.is_(True)).first()
+            Verification.destination_solution_id.like(solution_id) & Verification.verdict_of_human.is_(True)).first()
         user_id = None
         task_id = None
         if verification is not None:
@@ -143,13 +143,13 @@ def get_one(solutionId):
         return errorSchema.dump(Error("Unexpected error")), 500
 
 
-def post(solutionId):
+def post(solution_id):
     try:
         # 1. Get solution entity with userId, task, etc from other DB
-        solutionId = 1
+        solution_id = 1
 
         # 2. filter users (filter.py)
-        filter(solutionId)
+        filter(solution_id)
 
         # 3. call API of other module
 
@@ -158,7 +158,7 @@ def post(solutionId):
         for i in response['Scores']:
             verification = Verification(**{
                 'source_solution_id': i['SolutionID'],
-                'destination_solution_id': solutionId,
+                'destination_solution_id': solution_id,
                 'source_user_id': 4,  # TODO: change to real id
                 'destination_user_id': 6,  # TODO: change to real id
                 'task_id': 59,  # TODO: change to real id
@@ -182,13 +182,13 @@ def post(solutionId):
         return errorSchema.dump(Error("Unexpected error")), 500
 
 
-def patch(solutionId, Body):
+def patch(solution_id, body):
     try:
-        if Body.get('is_plagiarism'):
-            Verification.query.filter(Verification.destination_solution_id == solutionId).update(
+        if body.get('is_plagiarism'):
+            Verification.query.filter(Verification.destination_solution_id == solution_id).update(
                 {Verification.verdict_of_human: True})
         else:
-            Verification.query.filter(Verification.destination_solution_id == solutionId).delete();
+            Verification.query.filter(Verification.destination_solution_id == solution_id).delete()
 
         db.session.commit()
         return errorSchema.dump(Error("OK")), 200
