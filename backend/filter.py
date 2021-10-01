@@ -1,5 +1,5 @@
 from generator import *
-from thirdparty import db
+from Thirdparty import db, fetch
 from models import (Metric, Verification, Error, VerificationSchema, ErrorSchema)
 import metrics
 from datetime import datetime, timedelta
@@ -56,7 +56,7 @@ def get_last_solutions_since(date, solutions):
 def get_top_solutions_ids_by_rating(solutions):
 	users_ratings = {}
 	for id in set([i['OwnerId'] for i in solutions]):
-		users_ratings[id] = get_user_rating(id)
+		users_ratings[id] = metrics.get_user_rating(id)
 
 	for i in solutions:
 		i['Rating'] = users_ratings[i['OwnerId']]
@@ -71,27 +71,6 @@ def get_top_solutions_ids_by_rating(solutions):
 		top_solutions_ids.append(solution['Id'])
 
 	return top_solutions_ids
-
-
-def fetch(result):
-	tmp = []
-
-	for i in result:
-		solution = {key: value for key, value in i.items()}
-		solution['CreatedAt'] = datetime.strptime(solution['CreatedAt'].split('.')[0], '%Y-%m-%d %H:%M:%S') # TODO: remove
-		tmp.append(solution)
-
-	return tmp
-
-def get_user_rating(id):
-	sources = len(Verification.query.filter(Verification.destination_user_id.like(id) & Verification.verdict_of_human.is_(True)).all())
-	destinations = len(Verification.query.filter(Verification.source_user_id.like(id) & Verification.verdict_of_human.is_(True)).all())
-
-	if sources+destinations == 0:
-		return 0
-
-	sources = sources * sources
-	return (destinations-sources) / (destinations+sources)
 
 
 def main(target_solution_id):

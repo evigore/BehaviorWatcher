@@ -1,6 +1,6 @@
 import os
 import json
-from thirdparty import db, ma
+from Thirdparty import db, ma
 from dataclasses import dataclass
 
 class Metric(db.Model):
