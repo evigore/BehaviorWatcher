@@ -16,9 +16,7 @@ Thirdparty.ma.init_app(app)
 connex_app.add_api('./swagger.yaml')
 
 with app.app_context():
-	if not os.path.exists("behaviorWatcher.db"):
-		Thirdparty.db.create_all()
+    if not os.path.exists("behaviorWatcher.db"):
+        Thirdparty.db.create_all()
 
 connex_app.run(debug=False)
-
-

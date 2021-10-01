@@ -5,8 +5,9 @@ HTTP handlers for /metrics route
 from flask import make_response, abort, jsonify
 from Thirdparty import db, exc, and_
 from models import (
-		Metric, Verification, Error,
-		MetricSchema, VerificationSchema, ErrorSchema)
+    Metric, Verification, Error,
+    MetricSchema, VerificationSchema, ErrorSchema,
+)
 
 errorSchema = ErrorSchema()
 metricSchema = MetricSchema()
@@ -45,10 +46,11 @@ def post(Body):
     """
 
     try:
-        result = Metric.query.filter(Metric.user_id.like(Body.get('user_id')) & Metric.task_id.like(Body.get('task_id'))).one_or_none()
+        result = Metric.query.filter(
+            Metric.user_id.like(Body.get('user_id')) & Metric.task_id.like(Body.get('task_id'))).one_or_none()
         if result is not None:
             return patch(result.id, Body)
-            #return errorSchema.dump(Error(f"Metric with user_id={Body['user_id']} and task_id={Body['task_id']} already exists.")), 400
+            # return errorSchema.dump(Error(f"Metric with user_id={Body['user_id']} and task_id={Body['task_id']} already exists.")), 400
 
         metric = Metric(**Body)
         db.session.add(metric)
@@ -111,7 +113,8 @@ def patch(metricId, Body):
 
         return metricSchema.dump(metric), 200
     except exc.IntegrityError:
-        return errorSchema.dump(Error(f"Metric with user_id={metric.user_id} and task_id={metric.task_id} already exists")), 400
+        return errorSchema.dump(
+            Error(f"Metric with user_id={metric.user_id} and task_id={metric.task_id} already exists")), 400
     except Exception:
         return errorSchema.dump(Error("Unexpected error")), 500
 
@@ -124,7 +127,6 @@ def delete(metricId):
     :param metricId    Id of the metric to update
     """
 
-
     try:
         metric = Metric.query.filter(Metric.id.like(metricId)).one_or_none()
         if metric is None:
@@ -136,5 +138,3 @@ def delete(metricId):
         return errorSchema.dump(Error("OK")), 200
     except Exception:
         return errorSchema.dump(Error("Unexpected error")), 500
-
-

@@ -75,8 +75,6 @@ apiResponse = """{
 }"""
 
 
-
-
 def get_one(solutionId):
     """
     Respond to a GET request for /verifications/{solutionId}
@@ -85,78 +83,77 @@ def get_one(solutionId):
     :param solutionId           Id of the verification to return
     :return (verification, 200) | (404)
     """
-	
-    #verification = Verification.query.filter(Verification.id == solutionId).one_or_none()
-    #if verification is None:
-        #errorSchema.dump(Error(f"Metric with metricId: {solutionId} does not exists")), 400
 
-    #return verificationSchema.dump(verification), 200
-	
-	# 1. Get solution entity with userId, task, etc from other DB
-	# 2. Get another data
-	# 4. Calculate something
-	# 5. ...
-	# 6. Magic
-	# 7. Profit
 
-	# 1. K
-	# 2. I
-	# 4. L
-	# 5. L
-	# 6. M
-	# 7. E
+# verification = Verification.query.filter(Verification.id == solutionId).one_or_none()
+# if verification is None:
+# errorSchema.dump(Error(f"Metric with metricId: {solutionId} does not exists")), 400
+
+# return verificationSchema.dump(verification), 200
+
+# 1. Get solution entity with userId, task, etc from other DB
+# 2. Get another data
+# 4. Calculate something
+# 5. ...
+# 6. Magic
+# 7. Profit
+
+# 1. K
+# 2. I
+# 4. L
+# 5. L
+# 6. M
+# 7. E
 
 
 def post(solutionId):
-	try:
-		# 1. Get solution entity with userId, task, etc from other DB
-		solutionId = 1
+    try:
+        # 1. Get solution entity with userId, task, etc from other DB
+        solutionId = 1
 
-		# 2. filter users (filter.py)
-		filter(solutionId)
+        # 2. filter users (filter.py)
+        filter(solutionId)
 
-		# 3. call API of other module
+        # 3. call API of other module
 
-		# apiResponse = request(...) # TODO: real request
-		response = json.loads(apiResponse)
-		for i in response['Scores']:
-			verification = Verification(**{
-				'source_solution_id': i['SolutionID'],
-				'destination_solution_id': solutionId,
-				'source_user_id': 4, # TODO: change to real id
-				'destination_user_id': 6, # TODO: change to real id
-				'task_id': 59, # TODO: change to real id
-				'verdict_of_module': response['Verdict'],
-				'total_score': i['TotalScore'],
-				'text_based_score': i['TextBasedScore'],
-				'token_based_score': i['TokenBasedScore'],
-				'metric_based_score': i['MetricBasedScore'],
-				'binary_based_score': i['BinaryBasedScore'],
-				'tree_based_score': i['TreeBasedScore']
-			})
+        # apiResponse = request(...) # TODO: real request
+        response = json.loads(apiResponse)
+        for i in response['Scores']:
+            verification = Verification(**{
+                'source_solution_id': i['SolutionID'],
+                'destination_solution_id': solutionId,
+                'source_user_id': 4,  # TODO: change to real id
+                'destination_user_id': 6,  # TODO: change to real id
+                'task_id': 59,  # TODO: change to real id
+                'verdict_of_module': response['Verdict'],
+                'total_score': i['TotalScore'],
+                'text_based_score': i['TextBasedScore'],
+                'token_based_score': i['TokenBasedScore'],
+                'metric_based_score': i['MetricBasedScore'],
+                'binary_based_score': i['BinaryBasedScore'],
+                'tree_based_score': i['TreeBasedScore']
+            })
 
-			db.session.add(verification)
+            db.session.add(verification)
 
-		# 4. save result to our DB (especially to Verification TABLE)
-		db.session.commit()
+        # 4. save result to our DB (especially to Verification TABLE)
+        db.session.commit()
 
-		return errorSchema.dump(Error("OK")), 200
-	except Exception as e:
-		print(str(e)) # TODO: delete
-		return errorSchema.dump(Error("Unexpected error")), 500
+        return errorSchema.dump(Error("OK")), 200
+    except Exception as e:
+        print(str(e))  # TODO: delete
+        return errorSchema.dump(Error("Unexpected error")), 500
 
 
 def patch(solutionId, Body):
-	try: 
-		if Body.get('is_plagiarism'):
-			Verification.query.filter(Verification.destination_solution_id == solutionId).update({Verification.verdict_of_human: True})
-		else:
-			Verification.query.filter(Verification.destination_solution_id == solutionId).delete();
+    try:
+        if Body.get('is_plagiarism'):
+            Verification.query.filter(Verification.destination_solution_id == solutionId).update(
+                {Verification.verdict_of_human: True})
+        else:
+            Verification.query.filter(Verification.destination_solution_id == solutionId).delete();
 
-		db.session.commit()
-		return errorSchema.dump(Error("OK")), 200
-	except Exception:
-		return errorSchema.dump(Error("Unexpected error")), 500
-
-
-
+        db.session.commit()
+        return errorSchema.dump(Error("OK")), 200
+    except Exception:
+        return errorSchema.dump(Error("Unexpected error")), 500
