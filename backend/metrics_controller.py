@@ -2,11 +2,14 @@
 HTTP handlers for /metrics route
 """
 
-from flask import make_response, abort, jsonify
-from Thirdparty import db, exc, and_
+from thirdparty import db, exc, and_
 from models import (
-    Metric, Verification, Error,
-    MetricSchema, VerificationSchema, ErrorSchema,
+    Error,
+    ErrorSchema,
+    Metric,
+    Verification,
+    MetricSchema,
+    VerificationSchema,
 )
 
 errorSchema = ErrorSchema()

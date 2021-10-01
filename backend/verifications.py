@@ -1,10 +1,10 @@
 """
 HTTP handlers for /verification route
 """
+import json
+import filter
 
 from thirdparty import db
-import filter
-import json
 from models import (Verification, Error, VerificationSchema, ErrorSchema)
 
 errorSchema = ErrorSchema()

@@ -1,7 +1,6 @@
 from flask import Flask
 from flask import jsonify
 from flask import request
-from flask import Response
 from flask import abort
 from flask import render_template
 from flask import send_from_directory

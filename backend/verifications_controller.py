@@ -1,12 +1,12 @@
 """
 HTTP handlers for /verification route
 """
-
-from Thirdparty import db, fetch
-import filter
 import json
-from flask import jsonify
+import filter
 import metrics
+
+from flask import jsonify
+from thirdparty import db, fetch
 from models import (Metric, Verification, Error, VerificationSchema, ErrorSchema)
 
 errorSchema = ErrorSchema()

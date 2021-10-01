@@ -1,9 +1,8 @@
-from generator import *
-from Thirdparty import db, fetch
-from models import (Metric, Verification, Error, VerificationSchema, ErrorSchema)
-import metrics
-from datetime import datetime, timedelta
 import sys
+import metrics
+
+from thirdparty import db, fetch
+from models import Verification
 
 SUSPECT_AMOUNT = 30
 

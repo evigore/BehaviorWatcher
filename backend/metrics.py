@@ -1,4 +1,4 @@
-from models import (Metric, Verification, VerificationSchema, ErrorSchema)
+from models import Verification
 
 
 def get_user_rating(user_id):

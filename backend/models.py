@@ -1,7 +1,5 @@
-import os
-import json
-from Thirdparty import db, ma
 from dataclasses import dataclass
+from thirdparty import db, ma
 
 
 class Metric(db.Model):
