@@ -155,5 +155,6 @@ def patch(solutionId, Body):
 
         db.session.commit()
         return errorSchema.dump(Error("OK")), 200
-    except Exception:
+    except Exception as e:
+        print(e)
         return errorSchema.dump(Error("Unexpected error")), 500

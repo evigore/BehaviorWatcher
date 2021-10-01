@@ -38,7 +38,8 @@ def get(user_id=None, task_id=None):
 
         metrics = Metric.query.filter(Metric.user_id.like(user_id) & Metric.task_id.like(task_id)).all()
         return metricsSchema.dump(metrics), 200
-    except Exception:
+    except Exception as e:
+        print(e)
         return errorSchema.dump(Error('Unexpected error')), 500
 
 
@@ -62,7 +63,8 @@ def post(Body):
         return get_one(metric.id)[0]
     except TypeError as e:
         return errorSchema.dump(Error(str(e))), 400
-    except Exception:
+    except Exception as e:
+        print(e)
         return errorSchema.dump(Error("Unexpected error")), 500
 
 
@@ -81,7 +83,8 @@ def get_one(metricId):
             return errorSchema.dump(Error(f"Metric with metricId={metricId} does not exists")), 400
 
         return metricSchema.dump(metric), 200
-    except Exception:
+    except Exception as e:
+        print(e)
         return errorSchema.dump(Error("Unexpected error")), 500
 
 
@@ -118,7 +121,8 @@ def patch(metricId, Body):
     except exc.IntegrityError:
         return errorSchema.dump(
             Error(f"Metric with user_id={metric.user_id} and task_id={metric.task_id} already exists")), 400
-    except Exception:
+    except Exception as e:
+        print(e)
         return errorSchema.dump(Error("Unexpected error")), 500
 
 
@@ -139,5 +143,6 @@ def delete(metricId):
         db.session.commit()
 
         return errorSchema.dump(Error("OK")), 200
-    except Exception:
+    except Exception as e:
+        print(e)
         return errorSchema.dump(Error("Unexpected error")), 500
