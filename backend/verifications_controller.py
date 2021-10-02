@@ -1,12 +1,12 @@
 """
 HTTP handlers for /verification route
 """
-
-from Thirdparty import db, fetch
-import filter
 import json
-from flask import jsonify
+import filter
 import metrics
+
+from flask import jsonify
+from thirdparty import db, fetch
 from models import (Metric, Verification, Error, VerificationSchema, ErrorSchema)
 
 errorSchema = ErrorSchema()
@@ -77,122 +77,120 @@ apiResponse = """{
 }"""
 
 
-def get_one(solutionId):
-	try:
-		# get user id and task id
-		verification = Verification.query.filter(Verification.destination_solution_id.like(solutionId) & Verification.verdict_of_human.is_(True)).first()
-		user_id = None
-		task_id = None
-		if verification is not None:
-			user_id = verification.destination_user_id
-			task_id = verification.task_id
+def get_one(solution_id):
+    try:
+        # get user id and task id
+        verification = Verification.query.filter(
+            Verification.destination_solution_id.like(solution_id) & Verification.verdict_of_human.is_(True)).first()
+        user_id = None
+        task_id = None
+        if verification is not None:
+            user_id = verification.destination_user_id
+            task_id = verification.task_id
 
-		# get user rating
-		rating = metrics.get_user_rating(user_id) if verification else None
+        # get user rating
+        rating = metrics.get_user_rating(user_id) if verification else None
 
-		# get task_copied, task_viewed and reading_time
-		metric = Metric.query.filter(Metric.user_id.like(user_id) & Metric.task_id.like(task_id)).one_or_none()
-		reading_time = metric.reading_time
-		task_copied = False
-		task_viewed = False
-		if metric:
-			task_copied = metric.task_viewed
-			task_viewed = metric.task_copied
+        # get task_copied, task_viewed and reading_time
+        metric = Metric.query.filter(Metric.user_id.like(user_id) & Metric.task_id.like(task_id)).one_or_none()
+        reading_time = metric.reading_time
+        task_copied = False
+        task_viewed = False
+        if metric:
+            task_copied = metric.task_viewed
+            task_viewed = metric.task_copied
 
-		# time reading + number of attempts
-		solutions = fetch(db.engine.execute("SELECT OwnerId, COUNT(OwnerId) AS attempts FROM Solution WHERE TestTaskId='ff1636d5-0aab-479c-9aa2-b14271d8cdf2' GROUP BY OwnerId ORDER BY attempts", {
-			#'task_id': target_solution['TestTaskId'] # TODO: change to real task id
-		}))
-		user_id = 'e7c8a6c6-b73c-4179-8cb0-45bfcfea9ca5' # TODO: delete
-		average_attempts = 0
-		user_attempts = 0
-		for solution in solutions:
-			average_attempts += solution['attempts']
-			if solution['OwnerId'] == user_id:
-				user_attempts = solution['attempts']
-		average_attempts /= len(solutions)
+        # time reading + number of attempts
+        solutions = fetch(db.engine.execute(
+            "SELECT OwnerId, COUNT(OwnerId) AS attempts FROM Solution WHERE TestTaskId='ff1636d5-0aab-479c-9aa2-b14271d8cdf2' GROUP BY OwnerId ORDER BY attempts",
+            {
+                # 'task_id': target_solution['TestTaskId'] # TODO: change to real task id
+            }))
+        user_id = 'e7c8a6c6-b73c-4179-8cb0-45bfcfea9ca5'  # TODO: delete
+        average_attempts = 0
+        user_attempts = 0
+        for solution in solutions:
+            average_attempts += solution['attempts']
+            if solution['OwnerId'] == user_id:
+                user_attempts = solution['attempts']
+        average_attempts /= len(solutions)
 
-		time_and_attempts = ''
-		if reading_time < 3:
-			time_and_attempts = 'Пользователь не читал задание'
-		elif user_attempts < average_attempts:
-			time_and_attempts = 'Пользователь решил задание за меньше среднего количества попыток'
-		elif user_attempts >= average_attempts:
-			time_and_attempts = 'Пользователь решил задание за больше среднего количества попыток'
+        time_and_attempts = ''
+        if reading_time < 3:
+            time_and_attempts = 'Пользователь не читал задание'
+        elif user_attempts < average_attempts:
+            time_and_attempts = 'Пользователь решил задание за меньше среднего количества попыток'
+        elif user_attempts >= average_attempts:
+            time_and_attempts = 'Пользователь решил задание за больше среднего количества попыток'
 
-	
-		# order of solution
-		#solutions = fetch(db.engine.execute("SELECT OwnerId, CreatedAt FROM Solution WHERE TestTaskId='ff1636d5-0aab-479c-9aa2-b14271d8cdf2' AND FailedTest IS NULL GROUP BY OwnerId", {
-			##'task_id': target_solution['TestTaskId'] # TODO: change to real task id
-		#}))
-		#solutions.sort(reverse=True, key=lambda i: i['CreatedAt'])
-		#print(solutions[0], solutions[1])
+        # order of solution
+        # solutions = fetch(db.engine.execute("SELECT OwnerId, CreatedAt FROM Solution WHERE TestTaskId='ff1636d5-0aab-479c-9aa2-b14271d8cdf2' AND FailedTest IS NULL GROUP BY OwnerId", {
+        ##'task_id': target_solution['TestTaskId'] # TODO: change to real task id
+        # }))
+        # solutions.sort(reverse=True, key=lambda i: i['CreatedAt'])
+        # print(solutions[0], solutions[1])
 
+        report = {
+            'rating': rating,
+            'task_viewed': task_viewed,
+            'task_copied': task_copied,
+            'time_and_attempts': time_and_attempts
+        }
 
-		report = {
-			'rating': rating,
-			'task_viewed': task_viewed,
-			'task_copied': task_copied,
-			'time_and_attempts': time_and_attempts
-		}
-
-		return jsonify(report), 200
-	except Exception as e:
-		print(str(e))
-		return errorSchema.dump(Error("Unexpected error")), 500
-
-
-
-def post(solutionId):
-	try:
-		# 1. Get solution entity with userId, task, etc from other DB
-		solutionId = 1
-
-		# 2. filter users (filter.py)
-		filter(solutionId)
-
-		# 3. call API of other module
-
-		# apiResponse = request(...) # TODO: real request
-		response = json.loads(apiResponse)
-		for i in response['Scores']:
-			verification = Verification(**{
-				'source_solution_id': i['SolutionID'],
-				'destination_solution_id': solutionId,
-				'source_user_id': 4, # TODO: change to real id
-				'destination_user_id': 6, # TODO: change to real id
-				'task_id': 59, # TODO: change to real id
-				'verdict_of_module': response['Verdict'],
-				'total_score': i['TotalScore'],
-				'text_based_score': i['TextBasedScore'],
-				'token_based_score': i['TokenBasedScore'],
-				'metric_based_score': i['MetricBasedScore'],
-				'binary_based_score': i['BinaryBasedScore'],
-				'tree_based_score': i['TreeBasedScore']
-			})
-
-			db.session.add(verification)
-
-		# 4. save result to our DB (especially to Verification TABLE)
-		db.session.commit()
-
-		return errorSchema.dump(Error("OK")), 200
-	except Exception as e:
-		print(str(e)) # TODO: delete
-		return errorSchema.dump(Error("Unexpected error")), 500
+        return jsonify(report), 200
+    except Exception as e:
+        print(str(e))
+        return errorSchema.dump(Error("Unexpected error")), 500
 
 
-def patch(solutionId, Body):
-	try: 
-		if Body.get('is_plagiarism'):
-			Verification.query.filter(Verification.destination_solution_id == solutionId).update({Verification.verdict_of_human: True})
-		else:
-			Verification.query.filter(Verification.destination_solution_id == solutionId).delete();
+def post(solution_id):
+    try:
+        # 1. Get solution entity with userId, task, etc from other DB
+        solution_id = 1
 
-		db.session.commit()
-		return errorSchema.dump(Error("OK")), 200
-	except Exception:
-		return errorSchema.dump(Error("Unexpected error")), 500
+        # 2. filter users (filter.py)
+        filter(solution_id)
+
+        # 3. call API of other module
+        response = json.loads(apiResponse) # apiResponse = request(...) # TODO: real request
+
+        for i in response['Scores']:
+            verification = Verification(**{
+                'source_solution_id': i['SolutionID'],
+                'destination_solution_id': solution_id,
+                'source_user_id': 4,  # TODO: change to real id
+                'destination_user_id': 6,  # TODO: change to real id
+                'task_id': 59,  # TODO: change to real id
+                'verdict_of_module': response['Verdict'],
+                'total_score': i['TotalScore'],
+                'text_based_score': i['TextBasedScore'],
+                'token_based_score': i['TokenBasedScore'],
+                'metric_based_score': i['MetricBasedScore'],
+                'binary_based_score': i['BinaryBasedScore'],
+                'tree_based_score': i['TreeBasedScore']
+            })
+
+            db.session.add(verification)
+
+        # 4. save result to our DB (especially to Verification TABLE)
+        db.session.commit()
+
+        return errorSchema.dump(Error("OK")), 200
+    except Exception as e:
+        print(str(e)) # TODO: delete
+        return errorSchema.dump(Error("Unexpected error")), 500
 
 
+def patch(solution_id, body):
+    try:
+        if body.get('is_plagiarism'):
+            Verification.query.filter(Verification.destination_solution_id == solution_id).update(
+                {Verification.verdict_of_human: True})
+        else:
+            Verification.query.filter(Verification.destination_solution_id == solution_id).delete()
 
+        db.session.commit()
+        return errorSchema.dump(Error("OK")), 200
+    except Exception as e:
+        print(e)
+        return errorSchema.dump(Error("Unexpected error")), 500
