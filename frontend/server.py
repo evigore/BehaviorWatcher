@@ -1,3 +1,5 @@
+from os import environ
+
 from flask import Flask
 from flask import jsonify
 from flask import request
@@ -47,4 +49,12 @@ def index():
     return render_template('index.html')
 
 
-app.run(host='netx.ru', port=8080)
+def main():
+    host = str(environ.get("APPLICATION_HOST", "netx.ru"))
+    port = int(environ.get("APPLICATION_PORT", 8080))
+
+    app.run(host=host, port=port)
+
+
+if __name__ == "__main__":
+    main()
