@@ -2,7 +2,7 @@
 HTTP handlers for /metrics route
 """
 
-from thirdparty import db, exc
+from thirdparty import db
 from models import (
     Error,
     ErrorSchema,
@@ -116,9 +116,9 @@ def patch(metric_id, body):
         db.session.commit()
 
         return metricSchema.dump(metric), 200
-    except exc.IntegrityError:
+    except db.exc.IntegrityError:
         return errorSchema.dump(
-            Error(f"Metric with user_id={metric.user_id} and task_id={metric.task_id} already exists")), 400
+           Error(f"Metric with user_id={metric.user_id} and task_id={metric.task_id} already exists")), 400
     except Exception as e:
         print(e)
         return errorSchema.dump(Error("Unexpected error")), 500

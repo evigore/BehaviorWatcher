@@ -10,7 +10,7 @@ schemes:
 basePath: "/api"
 
 paths:
-  /verification/{solutionId}:
+  /verification/{solution_id}:
     get:
       description: Get detailed plagiarism data for specified solution.
       summary: Get detailed plagiarism data for specified solution.
@@ -20,7 +20,7 @@ paths:
       produces:
       - application/json
       parameters:
-        - name: solutionId
+        - name: solution_id
           in: path
           required: true
           type: integer
@@ -51,7 +51,7 @@ paths:
       produces:
         - application/json
       parameters:
-        - name: solutionId
+        - name: solution_id
           in: path
           required: true
           type: integer
@@ -68,7 +68,7 @@ paths:
           schema:
             $ref: '#/definitions/Error'
 
-  /verification/{solutionId}/verdict:
+  /verification/{solution_id}/verdict:
     patch:
       summary: Set status of plagiarism for concrete solution.
       description: Set status of plagiarism for concrete solution.
@@ -78,12 +78,12 @@ paths:
       produces:
         - application/json
       parameters:
-        - name: solutionId
+        - name: solution_id
           in: path
           required: true
           type: integer
           description: 'task_id and user_id could get from solution_id'
-        - name: Body
+        - name: body
           in: body
           required: true
           schema:
@@ -136,7 +136,7 @@ paths:
       produces:
         - application/json
       parameters:
-        - name: Body
+        - name: body
           in: body
           required: true
           description: ''
@@ -156,7 +156,7 @@ paths:
           schema:
             $ref: '#/definitions/Error'
 
-  /metrics/{metricId}:
+  /metrics/{metric_id}:
     get:
       operationId: metrics_controller.get_one
       description: Get concrete metric by id
@@ -165,7 +165,7 @@ paths:
       produces:
         - application/json
       parameters:
-      - name: metricId
+      - name: metric_id
         in: path
         required: true
         type: integer
@@ -194,11 +194,11 @@ paths:
       produces:
       - application/json
       parameters:
-      - name: metricId
+      - name: metric_id
         in: path
         required: true
         type: integer
-      - name: Body
+      - name: body
         in: body
         required: true
         description: 'Data to update the metric with'
@@ -219,13 +219,13 @@ paths:
             $ref: '#/definitions/Error'
     delete:
       operationId: metrics_controller.delete
-      description: Delete concrete metric using metricId
+      description: Delete concrete metric using metric_id
       tags:
         - Metric
       produces:
       - application/json
       parameters:
-      - name: metricId
+      - name: metric_id
         in: path
         required: true
         type: integer

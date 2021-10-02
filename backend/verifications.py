@@ -145,13 +145,13 @@ def post(solution_id):
         return errorSchema.dump(Error("Unexpected error")), 500
 
 
-def patch(solution_it, body):
+def patch(solution_id, body):
     try:
         if body.get('is_plagiarism'):
-            Verification.query.filter(Verification.destination_solution_id == solution_it).update(
+            Verification.query.filter(Verification.destination_solution_id == solution_id).update(
                 {Verification.verdict_of_human: True})
         else:
-            Verification.query.filter(Verification.destination_solution_id == solution_it).delete();
+            Verification.query.filter(Verification.destination_solution_id == solution_id).delete();
 
         db.session.commit()
         return errorSchema.dump(Error("OK")), 200

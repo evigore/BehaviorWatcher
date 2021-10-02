@@ -152,9 +152,8 @@ def post(solution_id):
         filter(solution_id)
 
         # 3. call API of other module
+        response = json.loads(apiResponse) # apiResponse = request(...) # TODO: real request
 
-        # apiResponse = request(...) # TODO: real request
-        response = json.loads(apiResponse)
         for i in response['Scores']:
             verification = Verification(**{
                 'source_solution_id': i['SolutionID'],
@@ -178,7 +177,7 @@ def post(solution_id):
 
         return errorSchema.dump(Error("OK")), 200
     except Exception as e:
-        print(str(e))  # TODO: delete
+        print(str(e)) # TODO: delete
         return errorSchema.dump(Error("Unexpected error")), 500
 
 
